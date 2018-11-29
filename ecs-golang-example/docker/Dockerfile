@@ -11,7 +11,7 @@ WORKDIR $GOPATH/src/mypackage/myapp/
 RUN go get -d -v
 
 #build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/hello
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/buzz
 
 # STEP 2 build a small image
 # start from scratch

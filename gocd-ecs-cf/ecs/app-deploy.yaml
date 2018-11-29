@@ -8,9 +8,6 @@ Parameters:
   s3cf:
     Description:  S3 bucket name for storage cloudformation templates.
     Type: String
-  ecrRepo:
-    Description:  ECR repository of application images.
-    Type: AWS::ECR::Repository
   ecsCluster:
     Description:  ECS Cluster for application running.
     Type: AWS::ECS::Cluster
@@ -43,7 +40,11 @@ Parameters:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
 
 Resources:
-  #AppsvrElbTargetGroup, LaunchConfigurationRole
+  AppEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${stackName}-app-repo/${serviceName}'
+
   ApplicationTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -52,7 +53,9 @@ Resources:
       - Name:
           !Sub '${serviceName}'
         Image:
-          !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ecrRepo}/${serviceName}:${imageVersion}'
+          !Sub
+            - '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ecrRepo}:${imageVersion}'
+            - { ecrRepo: !Ref AppEcrRepository }
         Memory: 512
         Environment:
            - Name: AWS_DEFAULT_REGION
