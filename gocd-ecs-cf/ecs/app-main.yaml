@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  The CloudFormation template is designed for CI/CD example.
+
+Parameters:
+  serviceName:
+    Description:  Service name inside the ECS Cluster.
+    Type: String
+  baseStackName:
+    Description: The name of stack of infrastructure building.
+    Type: String
+  env:
+    Description: Resouces for specific environment.
+    Type: String
+  s3cf:
+    Description:  S3 bucket name for storage cloudformation templates.
+    Type: String
+    Default: "cloudformation-box/gocd-cf"
+  keyPairName:
+    Description:  Key pair name for ec2.
+    Type: String
+    Default: "demo-4-all"
+  instanceType:
+    Description:  instance tyep for ec2.
+    Type: String
+    Default: t2.medium
+
+Resources:
+
+  EcsCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        stackName:  !Sub '${AWS::StackName}'
+        serviceName:  !Ref serviceName
+      #   baseVpc:
+      #     Fn::ImportValue:
+      #       !Sub '${AWS::StackName}-${env}-BaseVPC'
+      #   s3cf: !Ref s3cf
+      Tags:
+        - Key: Name
+          Value: ecs-cluster
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/ecs/app-ecs.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  Ec2InstanceGroup4Ecs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        keyPairName:  !Ref keyPairName
+        baseVpc:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-baseVpc'
+        s3cf: !Ref s3cf
+        publicSubnet1a:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pub1aSubnet'
+        publicSubnet1b:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pub1bSubnet'
+        publicSubnet1c:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pub1cSubnet'
+        privateSubnet1a:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pri1aSubnet'
+        privateSubnet1b:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pri1bSubnet'
+        privateSubnet1c:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-pri1cSubnet'
+        instanceType: !Ref instanceType
+        ecsCluster: !GetAtt EcsCluster.Outputs.appEcsCluster
+
+      Tags:
+        - Key: Name
+          Value: ec2-asg
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/ecs/app-asg.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+
+Outputs:
+  appElbTargetGroup:
+    Description: ELB target grpup.
+    Value:  !GetAtt Ec2InstanceGroup4Ecs.Outputs.appElbTargetGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-${env}-tg'
+  appElasticLoadBalancing:
+    Description: ELB target grpup.
+    Value:  !GetAtt Ec2InstanceGroup4Ecs.Outputs.appElasticLoadBalancing
+    Export:
+      Name: !Sub '${AWS::StackName}-${env}-elb'
+  launchConfigurationRole:
+    Description: Launch configurationrole for containers.
+    Value:  !GetAtt Ec2InstanceGroup4Ecs.Outputs.launchConfigurationRole
+    Export:
+      Name: !Sub '${AWS::StackName}-${env}-role'

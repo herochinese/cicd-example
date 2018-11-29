@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  The CloudFormation template is designed for CI/CD example.
+
+Parameters:
+  s3cf:
+    Description:  S3 bucket name for storage cloudformation templates.
+    Type: String
+    Default: "cloudformation-box/gocd-cf"
+  cidr4Vpc:
+    Type: String
+    Default:  "10.0.0.0/16"
+  cidr4Dev:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.0.10.0/24, 10.0.30.0/24, 10.0.50.0/24, 10.0.20.0/24, 10.0.40.0/24, 10.0.60.0/24"
+  cidr4Test:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.2.10.0/24, 10.2.30.0/24, 10.2.50.0/24, 10.2.20.0/24, 10.2.40.0/24, 10.2.60.0/24"
+  cidr4Qual:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.4.10.0/24, 10.4.30.0/24, 10.4.50.0/24, 10.4.20.0/24, 10.4.40.0/24, 10.4.60.0/24"
+  cidr4Prod:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.6.10.0/24, 10.6.30.0/24, 10.6.50.0/24, 10.6.20.0/24, 10.6.40.0/24, 10.6.60.0/24"
+  keyPairName:
+    Description:  Key pair name for ec2.
+    Type: String
+    Default: "demo-4-all"
+
+Resources:
+  Network4Dev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        vpcCidr: !Ref cidr4Vpc
+        subnetCidr: !Ref cidr4Dev
+        env:  "dev"
+      Tags:
+        - Key: Name
+          Value: Network4Dev
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  # Network4Test:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       vpcCidr: !Ref cidr4Vpc
+  #       subnetCidr: !Ref cidr4Dev
+  #       env:  "test"
+  #     Tags:
+  #       - Key: Name
+  #         Value: Network4Test
+  #     TemplateURL:  !Sub
+  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - { s3Name: !Ref s3cf }
+  #     TimeoutInMinutes: "60"
+
+  # Network4Qual:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       vpcCidr: !Ref cidr4Vpc
+  #       subnetCidr: !Ref cidr4Qual
+  #       env:  "qual"
+  #     Tags:
+  #       - Key: Name
+  #         Value: Network4Qual
+  #     TemplateURL:  !Sub
+  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - { s3Name: !Ref s3cf }
+  #     TimeoutInMinutes: "60"
+  #
+  # Network4Prod:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     Parameters:
+  #       vpcCidr: !Ref cidr4Vpc
+  #       subnetCidr: !Ref cidr4Dev
+  #       env:  "prod"
+  #     Tags:
+  #       - Key: Name
+  #         Value: Network4Prod
+  #     TemplateURL:  !Sub
+  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - { s3Name: !Ref s3cf }
+  #     TimeoutInMinutes: "60"
+
+  GoCDServer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        keyPairName:  !Ref keyPairName
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        s3cf: !Ref s3cf
+        publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
+        publicSubnet1b: !GetAtt Network4Dev.Outputs.publicSubnet1b
+        publicSubnet1c: !GetAtt Network4Dev.Outputs.publicSubnet1c
+        privateSubnet1a:  !GetAtt Network4Dev.Outputs.privateSubnet1a
+        privateSubnet1b:  !GetAtt Network4Dev.Outputs.privateSubnet1b
+        privateSubnet1c:  !GetAtt Network4Dev.Outputs.privateSubnet1c
+      Tags:
+        - Key: Name
+          Value: GoCD-Server
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/x-gocd-server.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  GoCDAgent:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        keyPairName:  !Ref keyPairName
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        s3cf: !Ref s3cf
+        publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
+        publicSubnet1b: !GetAtt Network4Dev.Outputs.publicSubnet1b
+        publicSubnet1c: !GetAtt Network4Dev.Outputs.publicSubnet1c
+        privateSubnet1a:  !GetAtt Network4Dev.Outputs.privateSubnet1a
+        privateSubnet1b:  !GetAtt Network4Dev.Outputs.privateSubnet1b
+        privateSubnet1c:  !GetAtt Network4Dev.Outputs.privateSubnet1c
+        elbDns: !GetAtt GoCDServer.Outputs.elbDns
+      Tags:
+        - Key: Name
+          Value: GoCD-Agent
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/x-gocd-agent.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  BastionServer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        keyPairName:  !Ref keyPairName
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        s3cf: !Ref s3cf
+        publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
+        publicSubnet1b: !GetAtt Network4Dev.Outputs.publicSubnet1b
+        publicSubnet1c: !GetAtt Network4Dev.Outputs.publicSubnet1c
+      Tags:
+        - Key: Name
+          Value: GoCD-Agent
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/x-bastion.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+Outputs:
+  devVpcStack:
+    Description: VPC Stack ID.
+    Value:  !GetAtt Network4Dev.Outputs.vpcStack
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-baseVpc'
+  devPublicSubnet1a:
+    Description: Public subnet 1a.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1a
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1aSubnet'
+  devPublicSubnet1b:
+    Description: Public subnet 1b.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1b
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1bSubnet'
+  devPublicSubnet1c:
+    Description: Public subnet 1c.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1c
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1cSubnet'
+
+  devPrivateSubnet1a:
+    Description: Private subnet 1a.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1a
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1aSubnet'
+  devPrivateSubnet1b:
+    Description: Private subnet 1b.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1b
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1bSubnet'
+  devPrivateSubnet1c:
+    Description: Private subnet 1c.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1c
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1cSubnet'

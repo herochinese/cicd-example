@@ -1,0 +1,32 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  This was designed for initializing ECR & ECS Cluster.
+
+Parameters:
+  stackName:
+    Description: Stack name without random string.
+    Type: String
+  serviceName:
+    Description:  Service name inside the ECS Cluster.
+    Type: String
+
+Resources:
+  AppEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${stackName}-app-repo/${serviceName}'
+
+  AppEcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${AWS::StackName}-ecs-cluster'
+
+Outputs:
+  appEcrRepo:
+    Description: ECR Repo.
+    Value:  !Ref AppEcrRepository
+  appEcsCluster:
+    Description: ECS Cluster.
+    Value:  !Ref AppEcsCluster

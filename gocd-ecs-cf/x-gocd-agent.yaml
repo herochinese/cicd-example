@@ -1,0 +1,359 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  This was design for a group of GoCD agents.
+
+
+Parameters:
+  keyPairName:
+    Description:  Key pair name for ec2.
+    Type: String
+  baseVpc:
+    Description: VPC to launch virtual server in.
+    Type: AWS::EC2::VPC::Id
+    # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
+  s3cf:
+    Description:  S3 bucket name for storage cloudformation templates.
+    Type: String
+  publicSubnet1a:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  publicSubnet1b:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  publicSubnet1c:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1a:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1b:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1c:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  instanceType:
+    Description:  instance tyep for ec2.
+    Type: String
+    Default: t3.small
+  elbDns:
+    Description: DNS name of Load Balancer.
+    Type: String
+
+Mappings:
+  RegionAMIMap:
+    ap-northeast-1:
+      AmazonLinux:  ami-cbf90ecb
+    us-east-1:
+      AmazonLinux:  ami-009d6802948d06e52
+    ap-southeast-1:
+      AmazonLinux:  ami-51a7aa2d
+    ap-southeast-2:
+      AmazonLinux:  ami-47c21a25
+
+
+
+Resources:
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to shost
+      VpcId: !Ref baseVpc
+      SecurityGroupIngress:
+      -
+        IpProtocol: TCP
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+      -
+        IpProtocol: TCP
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+      -
+        IpProtocol: TCP
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 10.0.0.0/16
+      -
+        IpProtocol: TCP
+        FromPort: '8000'
+        ToPort: '9000'
+        CidrIp: 0.0.0.0/0
+
+  LaunchConfigurationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: !Sub '${AWS::StackName}-launchConfiguration-policy'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "cloudwatch:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "xray:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2messages:AcknowledgeMessage"
+                  - "ec2messages:DeleteMessage"
+                  - "ec2messages:FailMessage"
+                  - "ec2messages:GetEndpoint"
+                  - "ec2messages:GetMessages"
+                  - "ec2messages:SendReply"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ssm:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:DescribeLogGroups"
+                  - "logs:DescribeLogStreams"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:UpdateContainerInstancesState"
+                  - "ecs:Submit*"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "ecr:InitiateLayerUpload"
+                  - "ecr:UploadLayerPart"
+                  - "ecr:CompleteLayerUpload"
+                  - "ecr:PutImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+      RoleName: !Sub '${AWS::StackName}-launch-role'
+
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        -
+          !Ref LaunchConfigurationRole
+
+  GAgentLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          files:
+            /home/ec2-user/inst/amazon-cloudwatch-agent.json:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/cloudwatch/amazon-cloudwatch-agent.json
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/inst/go-agent-18.10.0-7703.zip:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/gocd/go-agent-18.10.0-7703.zip
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/inst/jdk-8u191-linux-x64.tar.gz:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/gocd/jdk-8u191-linux-x64.tar.gz
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/inst/bashrc.ext:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/bashrc.ext
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/first-run.sh:
+              content:
+                !Sub |
+                #!/bin/bash
+                sudo yum update -y
+                sudo yum install git golang -y
+                sudo amazon-linux-extras install docker -y
+                cd /home/ec2-user/cloudwatch
+                sudo ./install.sh
+                cd /home/ec2-user
+                sudo cp /home/ec2-user/inst/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/.
+                cd /opt/aws/amazon-cloudwatch-agent/etc
+                sudo sed -i -e "s/{aws_stack_name}/${AWS::StackName}/g" amazon-cloudwatch-agent.json
+                instance_id=$(curl -s http://169.254.169.254/1.0/meta-data/instance-id/)
+                sudo sed -i -e "s/{instance_id}/$instance_id/g" amazon-cloudwatch-agent.json
+                sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+                cd /home/ec2-user
+                tar xzvf inst/jdk-8u191-linux-x64.tar.gz
+                unzip inst/go-agent-18.10.0-7703.zip
+                cat inst/bashrc.ext >> .bash_profile
+                cd /home/ec2-user/go-agent-18.10.0
+                sed -i -e "s/127.0.0.1/$GO_SERVER_DNS/g" go-agent.default
+                echo "export GO_SERVER=$GO_SERVER_DNS" >> .bash_profile
+                sudo chown -R ec2-user:ec2-user go-agent-18.10.0 jdk1.8.0_191
+                sudo systemctl start docker
+                sudo usermod -aG docker ec2-user
+
+
+              mode: "000755"
+              owner: "ec2-user"
+              group: "ec2-user"
+          sources:
+              /home/ec2-user/cloudwatch: https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+          commands:
+            agent1:
+              command:  "./first-run.sh"
+              env:
+                GO_SERVER_DNS:  !Ref elbDns
+              cwd: "/home/ec2-user"
+              ignoreErrors: false
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref LaunchConfigurationRole
+    Properties:
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings:                # optional, list of BlockDeviceMapping
+        - BlockDeviceMapping
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      ImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+      InstanceMonitoring: true
+      InstanceType: !Ref instanceType
+      KeyName: !Ref keyPairName
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdm
+          Ebs:
+            VolumeSize: 16
+            DeleteOnTermination: false
+      SecurityGroups:
+        -
+          !Ref Ec2SecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource GAgentLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource GAgentLaunchConfiguration --region ${AWS::Region}
+
+
+  GAgentAutoscalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    # DependsOn:  GAgentElasticLoadBalancing
+    Properties:
+      AvailabilityZones:
+        -
+          Fn::Select:
+            - 0
+            - Fn::GetAZs: ""
+        -
+          Fn::Select:
+            - 1
+            - Fn::GetAZs: ""
+        -
+          Fn::Select:
+            - 2
+            - Fn::GetAZs: ""
+      Cooldown: 30
+      DesiredCapacity: 3
+      # HealthCheckGracePeriod: Integer     # optional
+      # HealthCheckType: String     # optional
+      # InstanceId: String     # optional
+      LaunchConfigurationName: !Ref GAgentLaunchConfiguration
+      # TargetGroupARNs:
+      #   -
+      #     !Ref GAgentElbTargetGroup
+      MaxSize: 9
+      MetricsCollection:
+        -
+          Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+            - "GroupDesiredCapacity"
+            - "GroupInServiceInstances"
+            - "GroupPendingInstances"
+            - "GroupStandbyInstances"
+            - "GroupTerminatingInstances"
+            - "GroupTotalInstances"
+      MinSize: 1
+      # NotificationConfigurations:                # optional, list of NotificationConfiguration
+      #   - NotificationConfiguration
+      # PlacementGroup: String     # optional
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-agent-asg'
+          PropagateAtLaunch: true
+        - Key: Member
+          Value: appserver-of-AutoScalingGroup
+          PropagateAtLaunch: true
+
+      VPCZoneIdentifier:
+        -
+          !Ref privateSubnet1a
+        -
+          !Ref privateSubnet1b
+        -
+          !Ref privateSubnet1c

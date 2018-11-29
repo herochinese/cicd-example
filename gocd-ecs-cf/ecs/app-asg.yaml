@@ -1,0 +1,457 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  This was designed for application layer with auto scaling group, which is going to register to ECS Cluster.
+
+Parameters:
+  keyPairName:
+    Description:  Key pair name for ec2.
+    Type: String
+  baseVpc:
+    Description: VPC to launch virtual server in.
+    Type: AWS::EC2::VPC::Id
+    # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
+  s3cf:
+    Description:  S3 bucket name for storage cloudformation templates.
+    Type: String
+  publicSubnet1a:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  publicSubnet1b:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  publicSubnet1c:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1a:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1b:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  privateSubnet1c:
+    Description:  subnet to launch virtual server in.
+    Type: AWS::EC2::Subnet::Id
+  instanceType:
+    Description:  instance tyep for ec2.
+    Type: String
+    Default: t2.small
+  ecsCluster:
+    Description:  ECS Cluster for application running.
+    Type: String
+
+
+Mappings:
+  RegionAMIMap:
+    ap-northeast-1:
+      AmazonLinux:  ami-cbf90ecb
+    us-east-1:
+      AmazonLinux:  ami-0a6b7e0cc0b1f464f
+    ap-southeast-1:
+      AmazonLinux:  ami-51a7aa2d
+    ap-southeast-2:
+      AmazonLinux:  ami-47c21a25
+
+
+
+Resources:
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to shost
+      VpcId: !Ref baseVpc
+      SecurityGroupIngress:
+      -
+        IpProtocol: TCP
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+      -
+        IpProtocol: TCP
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+      -
+        IpProtocol: TCP
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 10.0.0.0/16
+      -
+        IpProtocol: TCP
+        FromPort: '8000'
+        ToPort: '9000'
+        CidrIp: 0.0.0.0/0
+  ELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow tcp to shost
+      VpcId: !Ref baseVpc
+      SecurityGroupIngress:
+      -
+        IpProtocol: TCP
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      -
+        IpProtocol: TCP
+        FromPort: '8000'
+        ToPort: '9000'
+        CidrIp: 10.0.0.0/16
+
+  LaunchConfigurationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: !Sub '${AWS::StackName}-launchConfiguration-policy'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "cloudwatch:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "xray:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2messages:AcknowledgeMessage"
+                  - "ec2messages:DeleteMessage"
+                  - "ec2messages:FailMessage"
+                  - "ec2messages:GetEndpoint"
+                  - "ec2messages:GetMessages"
+                  - "ec2messages:SendReply"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ssm:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:DescribeLogGroups"
+                  - "logs:DescribeLogStreams"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:UpdateContainerInstancesState"
+                  - "ecs:Submit*"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+      RoleName: !Sub '${AWS::StackName}-launch-role'
+
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        -
+          !Ref LaunchConfigurationRole
+
+  AppsvrLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          files:
+            /home/ec2-user/amazon-cloudwatch-agent-ecs.json:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/cloudwatch4ecs/amazon-cloudwatch-agent-ecs.json
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /etc/ecs/ecs.config:
+              content:
+                !Sub 'ECS_CLUSTER=${ecsCluster}'
+            /home/ec2-user/first-run.sh:
+              content:
+                !Sub |
+                #!/bin/bash
+                #sudo yum update -y
+                sudo yum install -y jq wget
+                sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+                sudo yum install -y awslogs
+                #ssm agent
+                # ->Amazon Linux
+                # sudo start amazon-ssm-agent
+                # sudo status amazon-ssm-agent
+                # ->Amazon Linux 2
+                sudo systemctl enable amazon-ssm-agent
+                sudo systemctl start amazon-ssm-agent
+                #ecs agent
+                # sudo rm -rf /var/lib/ecs/data/
+                # ->Amazon Linux
+                # sudo stop ecs
+                # sudo start ecs
+                # ->Amazon Linux 2
+                # sudo systemctl stop ecs
+                # sudo systemctl start ecs
+                #->
+                #-> ???  Caused 'sudo systemctl start ecs' was hanged when 'cfn-init' was running.
+                #-> ???  I guess it's bug.
+                #->
+                #awslog agent
+                # sudo mv /etc/awslogs/awslogs.conf /etc/awslogs/awslogs.conf.bak
+                # sudo cp /home/ec2-user/awslogs.conf /etc/awslogs/.
+                # cluster=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .Cluster')
+                # sudo sed -i -e "s/{cluster}/$cluster/g" /etc/awslogs/awslogs.conf
+                # container_instance_id=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $2}' )
+                # sudo sed -i -e "s/{container_instance_id}/$container_instance_id/g" /etc/awslogs/awslogs.conf
+                # sudo sed -i -e "s/{aws_stack_name}/$STACK_NAME/g" /etc/awslogs/awslogs.conf
+                # region=$(curl -s 169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+                # sed -i -e "s/region = us-east-1/region = $region/g" /etc/awslogs/awscli.conf
+                cd /home/ec2-user/cloudwatch
+                sudo ./install.sh
+                cd /home/ec2-user
+                sudo cp /home/ec2-user/amazon-cloudwatch-agent-ecs.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+                cd /opt/aws/amazon-cloudwatch-agent/etc
+                sudo sed -i -e "s/{aws_stack_name}/${AWS::StackName}/g" amazon-cloudwatch-agent.json
+                cluster=$ECS_CLUSTER
+                sudo sed -i -e "s/{cluster}/$cluster/g" amazon-cloudwatch-agent.json
+                container_instance_id=$(curl -s http://169.254.169.254/1.0/meta-data/instance-id/)
+                sudo sed -i -e "s/{container_instance_id}/$container_instance_id/g" amazon-cloudwatch-agent.json
+                sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+                # ->Amazon Linux
+                # sudo service awslogs start
+                # sudo chkconfig awslogs on
+                # ->Amazon Linux 2
+                # sudo systemctl start awslogsd
+                # sudo systemctl enable awslogsd.service
+
+              mode: "000755"
+              owner: "ec2-user"
+              group: "ec2-user"
+
+          sources:
+              /home/ec2-user/cloudwatch: https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+
+          commands:
+            # getConfig:
+            #   command:  !Join
+            #     - ''
+            #     - - 'aws s3 cp s3://'
+            #       -
+            #         !Ref s3cf
+            #       - '/cloudwatch/amazon-cloudwatch-agent.json amazon-cloudwatch-agent.json'
+            #   cwd: "/home/ec2-user"
+            #   ignoreErrors: false
+            agent1:
+              command:  "./first-run.sh"
+              env:
+                STACK_NAME: !Sub '${AWS::StackName}'
+                AWS_DEFAULT_REGION: !Sub '${AWS::Region}'
+                ECS_CLUSTER: !Ref ecsCluster
+              cwd: "/home/ec2-user"
+              ignoreErrors: false
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref LaunchConfigurationRole
+    Properties:
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings:                # optional, list of BlockDeviceMapping
+        - BlockDeviceMapping
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      ImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+      InstanceMonitoring: true
+      InstanceType: !Ref instanceType
+      KeyName: !Ref keyPairName
+      BlockDeviceMappings:
+        - DeviceName: /dev/sdm
+          Ebs:
+            VolumeSize: 16
+            DeleteOnTermination: false
+      SecurityGroups:
+        -
+          !Ref Ec2SecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo yum update -y
+            sudo yum install aws-cfn-bootstrap awscli -y
+            set -e
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
+
+
+  AppsvrElasticLoadBalancing:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: ipv4
+      Type: application
+      Scheme: internet-facing
+      SecurityGroups:
+        -
+          !Ref ELBSecurityGroup
+      Subnets:
+          -
+            !Ref publicSubnet1a
+          -
+            !Ref publicSubnet1b
+          -
+            !Ref publicSubnet1c
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-elb'
+
+  AppsvrElasticLoadBalancingListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          !Ref AppsvrElbTargetGroup
+      LoadBalancerArn:
+        !Ref AppsvrElasticLoadBalancing
+      Port: 80
+      Protocol: HTTP
+
+  AppsvrElbTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      HealthCheckPath: /
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-appsvr-tg'
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value:  20
+      TargetType: instance
+      VpcId: !Ref baseVpc
+
+
+  AppsvrAutoscalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:  AppsvrElasticLoadBalancing
+    Properties:
+      AvailabilityZones:
+        -
+          Fn::Select:
+            - 0
+            - Fn::GetAZs: ""
+        -
+          Fn::Select:
+            - 1
+            - Fn::GetAZs: ""
+        -
+          Fn::Select:
+            - 2
+            - Fn::GetAZs: ""
+      Cooldown: 30
+      DesiredCapacity: 3
+      # HealthCheckGracePeriod: Integer     # optional
+      # HealthCheckType: String     # optional
+      # InstanceId: String     # optional
+      LaunchConfigurationName: !Ref AppsvrLaunchConfiguration
+      TargetGroupARNs:
+        -
+          !Ref AppsvrElbTargetGroup
+      MaxSize: 9
+      MetricsCollection:
+        -
+          Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+            - "GroupDesiredCapacity"
+            - "GroupInServiceInstances"
+            - "GroupPendingInstances"
+            - "GroupStandbyInstances"
+            - "GroupTerminatingInstances"
+            - "GroupTotalInstances"
+      MinSize: 1
+      # NotificationConfigurations:                # optional, list of NotificationConfiguration
+      #   - NotificationConfiguration
+      # PlacementGroup: String     # optional
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-appsvr-asg'
+          PropagateAtLaunch: true
+        - Key: Member
+          Value: appserver-of-AutoScalingGroup
+          PropagateAtLaunch: true
+
+      VPCZoneIdentifier:
+        -
+          !Ref privateSubnet1a
+        -
+          !Ref privateSubnet1b
+        -
+          !Ref privateSubnet1c
+
+Outputs:
+  appElbTargetGroup:
+    Description: ELB target grpup.
+    Value:  !Ref AppsvrElbTargetGroup
+  launchConfigurationRole:
+    Description: Launch configurationrole for containers.
+    Value:  !Ref LaunchConfigurationRole
+  appElasticLoadBalancing:
+    Description: Load Balancer for containers.
+    Value:  !Ref AppsvrElasticLoadBalancing
