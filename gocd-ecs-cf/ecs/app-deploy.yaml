@@ -9,12 +9,9 @@ Parameters:
     Description: VPC to launch virtual server in.
     Type: AWS::EC2::VPC::Id
     # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
-  s3cf:
-    Description:  S3 bucket name for storage cloudformation templates.
-    Type: String
   ecsCluster:
     Description:  ECS Cluster for application running.
-    Type: AWS::ECS::Cluster
+    Type: String
   serviceName:
     Description:  Service name inside the ECS Cluster.
     Type: String
@@ -36,19 +33,129 @@ Parameters:
   ecrRepo:
     Description: ECR Repo.
     Type:  String
-  appElbTargetGroup:
-    Description: Target Group for containers.
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  launchConfigurationRole:
-    Description: Role for containers.
-    Type: AWS::IAM::Role
+  # appElbTargetGroup:
+  #   Description: Target Group for containers.
+  #   Type: String
   appElasticLoadBalancing:
     Description: Load Balancer for containers.
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: String
 
 Resources:
+
+  EcsConfigurationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ecs.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: !Sub '${AWS::StackName}-launchConfiguration-policy'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "cloudwatch:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "xray:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2messages:AcknowledgeMessage"
+                  - "ec2messages:DeleteMessage"
+                  - "ec2messages:FailMessage"
+                  - "ec2messages:GetEndpoint"
+                  - "ec2messages:GetMessages"
+                  - "ec2messages:SendReply"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ssm:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ds:CreateComputer"
+                  - "ds:DescribeDirectories"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:DescribeLogGroups"
+                  - "logs:DescribeLogStreams"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:UpdateContainerInstancesState"
+                  - "ecs:Submit*"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "elasticloadbalancing:*"
+                  - "route53:*"
+                  - "servicediscovery:*"
+                Resource: "*"
+      RoleName: !Sub '${AWS::StackName}-ecs-role'
+
+  ServiceLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName:
+        !Sub '${AWS::StackName}/ecs/${ecsCluster}/${serviceName}'
+      RetentionInDays:
+        !Ref  logRetentionDays
+
   ApplicationTaskDefinition:
     Type: AWS::ECS::TaskDefinition
+    DependsOn: ServiceLogGroup
     Properties:
       NetworkMode: host
       ContainerDefinitions:
@@ -64,9 +171,10 @@ Resources:
           LogDriver: awslogs
           Options:
             awslogs-group:
-              !Sub '${AWS::StackName}/ecs/Service/${serviceName}'
+              !Sub '${AWS::StackName}/ecs/${ecsCluster}/${serviceName}'
             awslogs-region:
               !Sub '${AWS::Region}'
+
         PortMappings:
           - ContainerPort: !Ref appContainerPort
             HostPort: !Ref appHostPort
@@ -84,8 +192,8 @@ Resources:
         - ContainerName:
             !Sub '${serviceName}'
           ContainerPort: !Ref appContainerPort
-          TargetGroupArn: !Ref appElbTargetGroup
-      Role: !Ref launchConfigurationRole
+          TargetGroupArn: !Ref AppsvrElbTargetGroup
+      Role: !Ref EcsConfigurationRole
 
       ServiceName: !Sub '${serviceName}-service'
       TaskDefinition: !Ref ApplicationTaskDefinition
@@ -99,7 +207,7 @@ Resources:
           !Ref AppsvrElbTargetGroup
       LoadBalancerArn:
         !Ref appElasticLoadBalancing
-      Port: 80
+      Port: !Ref appHostPort
       Protocol: HTTP
 
   AppsvrElbTargetGroup:
@@ -110,8 +218,10 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
-      HealthCheckPath: /
-      Port: 80
+      HealthCheckPath: /encode
+      Matcher:
+        HttpCode: '200'
+      Port: !Ref appHostPort
       Protocol: HTTP
       Tags:
         - Key: Name

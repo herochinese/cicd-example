@@ -5,9 +5,6 @@ Description: >
   This was designed for initializing ECR & ECS Cluster.
 
 Parameters:
-  stackName:
-    Description: Stack name without random string.
-    Type: String
   serviceName:
     Description:  Service name inside the ECS Cluster.
     Type: String
@@ -16,7 +13,7 @@ Resources:
   AppEcrRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: !Sub '${stackName}-app-repo/${serviceName}'
+      RepositoryName: !Sub '${AWS::StackName}-app-repo/${serviceName}'
 
   AppEcsCluster:
     Type: AWS::ECS::Cluster

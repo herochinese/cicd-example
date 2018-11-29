@@ -90,11 +90,6 @@ Resources:
       SecurityGroupIngress:
       -
         IpProtocol: TCP
-        FromPort: '22'
-        ToPort: '22'
-        CidrIp: 0.0.0.0/0
-      -
-        IpProtocol: TCP
         FromPort: '8000'
         ToPort: '9000'
         CidrIp: 10.0.0.0/16
@@ -192,6 +187,13 @@ Resources:
                   - "ecr:BatchGetImage"
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "elasticloadbalancing:*"
+                  - "route53:*"
+                  - "servicediscovery:*"
                 Resource: "*"
 
       RoleName: !Sub '${AWS::StackName}-launch-role'
@@ -451,7 +453,7 @@ Outputs:
     Value:  !Ref AppsvrElbTargetGroup
   launchConfigurationRole:
     Description: Launch configurationrole for containers.
-    Value:  !Ref LaunchConfigurationRole
+    Value:  !GetAtt LaunchConfigurationRole.Arn
   appElasticLoadBalancing:
     Description: Load Balancer for containers.
     Value:  !Ref AppsvrElasticLoadBalancing

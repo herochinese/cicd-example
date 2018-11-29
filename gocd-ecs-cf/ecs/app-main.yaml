@@ -3,11 +3,17 @@ Description: >
   The CloudFormation template is designed for CI/CD example.
 
 Parameters:
+  ecsStackName:
+    Description:  The name of stack of ECS.
+    Type: String
   serviceName:
     Description:  Service name inside the ECS Cluster.
     Type: String
   baseStackName:
     Description: The name of stack of infrastructure building.
+    Type: String
+  imageVersion:
+    Description:  The version of Docker Image.
     Type: String
   env:
     Description: Resouces for specific environment.
@@ -23,27 +29,10 @@ Parameters:
   instanceType:
     Description:  instance tyep for ec2.
     Type: String
-    Default: t2.medium
+    Default: t3.small
+
 
 Resources:
-
-  EcsCluster:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        stackName:  !Sub '${AWS::StackName}'
-        serviceName:  !Ref serviceName
-      #   baseVpc:
-      #     Fn::ImportValue:
-      #       !Sub '${AWS::StackName}-${env}-BaseVPC'
-      #   s3cf: !Ref s3cf
-      Tags:
-        - Key: Name
-          Value: ecs-cluster
-      TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/ecs/app-ecs.yaml
-          - { s3Name: !Ref s3cf }
-      TimeoutInMinutes: "60"
 
   Ec2InstanceGroup4Ecs:
     Type: AWS::CloudFormation::Stack
@@ -73,7 +62,7 @@ Resources:
           Fn::ImportValue:
             !Sub '${baseStackName}-${env}-pri1cSubnet'
         instanceType: !Ref instanceType
-        ecsCluster: !GetAtt EcsCluster.Outputs.appEcsCluster
+        ecsCluster: !Sub '${ecsStackName}-ecs-cluster'
 
       Tags:
         - Key: Name
@@ -83,6 +72,28 @@ Resources:
           - { s3Name: !Ref s3cf }
       TimeoutInMinutes: "60"
 
+
+  EcsDeploy:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        baseVpc:
+          Fn::ImportValue:
+            !Sub '${baseStackName}-${env}-baseVpc'
+        ecsCluster: !Sub '${ecsStackName}-ecs-cluster'
+        serviceName: !Ref serviceName
+        imageVersion: !Ref imageVersion
+        logRetentionDays: 30
+        ecrRepo: !Sub '${ecsStackName}-app-repo/${serviceName}'
+        appElasticLoadBalancing: !GetAtt Ec2InstanceGroup4Ecs.Outputs.appElasticLoadBalancing
+
+      Tags:
+        - Key: Name
+          Value: ecs-deploy
+      TemplateURL:  !Sub
+          - https://s3.amazonaws.com/${s3Name}/ecs/app-deploy.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
 
 Outputs:
   appElbTargetGroup:
