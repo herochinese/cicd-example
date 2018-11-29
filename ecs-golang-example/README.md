@@ -44,6 +44,23 @@ Note:
 000000000000 -> <account-id>
 us-east-1 -> <region>
 
+5. Deploy
+```
+aws cloudformation describe-stacks --stack-name jsd
+
+if [ $? -eq 0 ] do
+then
+  aws cloudformation describe-stacks --stack-name jsd
+
+else
+  aws cloudformation create-stack --stack-name myEcDeploy \
+    --template-url https://s3.amazonaws.com/cloudformation-box/gocd-cf/ecs/app-ecs.yaml  \
+    --parameters
+fi
+
+
+```
+
 ##Task
 
 ##Inspection
