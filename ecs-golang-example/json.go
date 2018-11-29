@@ -24,7 +24,7 @@ func main() {
 	http.HandleFunc("/decode", func(w http.ResponseWriter, r *http.Request) {
 		var user User
 		json.NewDecoder(r.Body).Decode(&user)
-		fmt.Println("Reponse -> %s", user)
+		fmt.Println("Reponse -> ", user)
 		fmt.Fprintf(w, "%s %s is %d years old!", user.Firstname, user.Lastname, user.Age)
 	})
 
@@ -35,7 +35,7 @@ func main() {
 			Lastname:  "Doe",
 			Age:       25,
 		}
-		fmt.Println("Reponse -> %s", peter)
+		fmt.Println("Reponse -> ", peter)
 		json.NewEncoder(w).Encode(peter)
 
 	})
