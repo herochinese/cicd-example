@@ -5,6 +5,10 @@ Description: >
   This was designed for application deployment on ECS Cluster.
 
 Parameters:
+  baseVpc:
+    Description: VPC to launch virtual server in.
+    Type: AWS::EC2::VPC::Id
+    # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
   s3cf:
     Description:  S3 bucket name for storage cloudformation templates.
     Type: String
@@ -29,6 +33,9 @@ Parameters:
     Type: Number
     Description: Host port of app requiring ELB exposure
     Default: 8080
+  ecrRepo:
+    Description: ECR Repo.
+    Type:  String
   appElbTargetGroup:
     Description: Target Group for containers.
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -40,11 +47,6 @@ Parameters:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
 
 Resources:
-  AppEcrRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub '${stackName}-app-repo/${serviceName}'
-
   ApplicationTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -53,9 +55,7 @@ Resources:
       - Name:
           !Sub '${serviceName}'
         Image:
-          !Sub
-            - '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ecrRepo}:${imageVersion}'
-            - { ecrRepo: !Ref AppEcrRepository }
+          !Sub  '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ecrRepo}:${imageVersion}'
         Memory: 512
         Environment:
            - Name: AWS_DEFAULT_REGION

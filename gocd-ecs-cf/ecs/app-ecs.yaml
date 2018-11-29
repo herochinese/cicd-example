@@ -13,6 +13,11 @@ Parameters:
     Type: String
 
 Resources:
+  AppEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${stackName}-app-repo/${serviceName}'
+
   AppEcsCluster:
     Type: AWS::ECS::Cluster
     Properties:

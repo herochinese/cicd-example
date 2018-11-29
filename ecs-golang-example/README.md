@@ -28,7 +28,14 @@ docker push 530820415924.dkr.ecr.us-east-1.amazonaws.com/jsd-app-repo/jsd:$APP_V
 
 ```
 
-4. Configure task definition & service in ECS cluster. Run CloudFormation template to deploy into ECS. 
+4. Configure task definition & service in ECS cluster. Run CloudFormation template to deploy into ECS.
+```
+cd cicd-example/gocd-ecs-cf/ecs
+aws cloudformation create-stack --stack-name myEcDeploy \
+  --template-body file://app-deploy.yaml  \
+  --parameters 
+
+```
 
 ##Task
 
