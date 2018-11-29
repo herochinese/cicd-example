@@ -2,7 +2,7 @@ FROM golang:alpine as builder
 # Install git
 RUN apk update && apk add git
 
-COPY ../json.go $GOPATH/src/mypackage/myapp/
+COPY ./json.go $GOPATH/src/mypackage/myapp/
 WORKDIR $GOPATH/src/mypackage/myapp/
 
 
