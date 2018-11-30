@@ -9,6 +9,7 @@ import (
 type User struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
+	Company	string `json:"company"`
 	Age       int    `json:"age"`
 }
 
@@ -25,7 +26,7 @@ func main() {
 		var user User
 		json.NewDecoder(r.Body).Decode(&user)
 		fmt.Println("Reponse -> ", user)
-		fmt.Fprintf(w, "%s %s is %d years old!", user.Firstname, user.Lastname, user.Age)
+		fmt.Fprintf(w, "%s %s is %d years old, who's from %s", user.Firstname, user.Lastname, user.Age, user.Company)
 	})
 
 
@@ -33,6 +34,7 @@ func main() {
 		peter := User{
 			Firstname: "John",
 			Lastname:  "Doe",
+			Company:  "Amazon Web Services",
 			Age:       25,
 		}
 		fmt.Println("Reponse -> ", peter)
