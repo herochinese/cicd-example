@@ -14,7 +14,7 @@ then
 
   echo "Createing new stack -> $ECS_STACK_NAME"
   aws cloudformation create-stack --stack-name $ECS_STACK_NAME \
-    --template-url https://s3.amazonaws.com/$BUCKET_NAME/gocd-cf/ecs/app-ecs.yaml  \
+    --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-ecs.yaml`  \
     --parameters \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
 
@@ -24,9 +24,10 @@ else
 
   echo "Updating new stack -> $ECS_STACK_NAME"
   aws cloudformation update-stack --stack-name $ECS_STACK_NAME \
-    --template-url https://s3.amazonaws.com/$BUCKET_NAME/gocd-cf/ecs/app-ecs.yaml  \
+    --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-ecs.yaml`  \
     --parameters \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
+
   aws cloudformation wait stack-update-complete --stack-name $ECS_STACK_NAME
 
 fi

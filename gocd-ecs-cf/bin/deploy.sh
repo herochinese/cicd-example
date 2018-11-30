@@ -24,7 +24,7 @@ then
 
   echo "Createing new stack -> $DEPLOY_STACK_NAME"
   aws cloudformation create-stack --stack-name $DEPLOY_STACK_NAME \
-    --template-url https://s3.amazonaws.com/$BUCKET_NAME/gocd-cf/ecs/app-main.yaml  \
+    --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-main.yaml`  \
     --parameters \
     ParameterKey=baseStackName,ParameterValue=$BASE_STACK_NAME \
     ParameterKey=ecsStackName,ParameterValue=$ECS_STACK_NAME \
@@ -38,7 +38,7 @@ else
 
   echo "Updating new stack -> $DEPLOY_STACK_NAME"
   aws cloudformation update-stack --stack-name $DEPLOY_STACK_NAME \
-    --template-url https://s3.amazonaws.com/$BUCKET_NAME/gocd-cf/ecs/app-main.yaml  \
+    --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-main.yaml`  \
     --parameters \
     ParameterKey=baseStackName,ParameterValue=$BASE_STACK_NAME \
     ParameterKey=ecsStackName,ParameterValue=$ECS_STACK_NAME \
