@@ -9,7 +9,7 @@ echo "Seting ECS  environment ..."
 aws cloudformation describe-stacks --stack-name $ECS_STACK_NAME
 isExist=$?
 
-if [ $isExist -eq 0 ]
+if [ $isExist -ne 0 ]
 then
 
   echo "Createing new stack -> $ECS_STACK_NAME"

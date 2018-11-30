@@ -1,6 +1,11 @@
 #!/bin/bash
 
+APP_VER=$GO_PIPELINE_LABEL
 DEPLOY_STACK_NAME="$ECS_STACK_NAME-deploy"
+AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
 
 echo "DEPLOY_STACK_NAME -> $DEPLOY_STACK_NAME"
 echo "ECS_STACK_NAME -> $ECS_STACK_NAME"
@@ -14,7 +19,7 @@ echo "Deploying application into ECS ..."
 aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME
 isExist=$?
 
-if [ $isExist -eq 0 ]
+if [ $isExist -ne 0 ]
 then
 
   echo "Createing new stack -> $DEPLOY_STACK_NAME"
