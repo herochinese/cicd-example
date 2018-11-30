@@ -270,7 +270,7 @@ Resources:
                 !Sub |
                 #!/bin/bash
                 sudo yum update -y
-                sudo yum install git golang -y
+                sudo yum install git golang jq -y
                 sudo amazon-linux-extras install docker -y
                 cd /home/ec2-user/cloudwatch
                 sudo ./install.sh

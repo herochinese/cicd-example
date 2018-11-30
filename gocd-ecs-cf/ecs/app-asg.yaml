@@ -457,3 +457,6 @@ Outputs:
   appElasticLoadBalancing:
     Description: Load Balancer for containers.
     Value:  !Ref AppsvrElasticLoadBalancing
+  elbDns:
+    Description: DNS name of Load Balancer.
+    Value:  !GetAtt AppsvrElasticLoadBalancing.DNSName
