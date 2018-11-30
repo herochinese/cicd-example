@@ -51,8 +51,8 @@ else
   cat output.json
   cat output.json |jq '.Stacks[0].Outputs[].OutputValue' >> to.mail
   aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
-    --subject  "Master, Check Out the Result of Deplouyment. `date`"
-    --message to.mail
+    --subject  "Master, Check Out the Result of Deplouyment. `date`" \
+    --message file://to.mail
 
 
 fi
