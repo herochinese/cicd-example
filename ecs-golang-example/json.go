@@ -1,9 +1,10 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"net/http"
 )
 
 type User struct {
@@ -42,6 +43,10 @@ func main() {
 
 	})
 
-	fmt.Println("Sever is ready at port-8080 ...")
+	ver := flag.String("ver","-1.0.0", "application version.")
+	flag.Parse()
+
+	fmt.Println("Server Version: ", *ver)
+	fmt.Println("Sever is ready at port [8080] ...")
 	http.ListenAndServe(":8080", nil)
 }

@@ -1,8 +1,13 @@
 FROM golang:alpine as builder
+
+ARG ver=0.0.0
+
+
 # Install git
 RUN apk update && apk add git
 
 COPY ./json.go $GOPATH/src/mypackage/myapp/
+RUN sed -i -e "s/-1.0.0/$ver/g" $GOPATH/src/mypackage/myapp/json.go
 WORKDIR $GOPATH/src/mypackage/myapp/
 
 

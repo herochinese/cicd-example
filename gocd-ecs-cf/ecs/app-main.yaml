@@ -111,3 +111,6 @@ Outputs:
     Value:  !GetAtt Ec2InstanceGroup4Ecs.Outputs.launchConfigurationRole
     Export:
       Name: !Sub '${AWS::StackName}-${env}-role'
+  elbDns:
+    Description: DNS name of Load Balancer.
+    Value:  !GetAtt Ec2InstanceGroup4Ecs.Outputs.elbDns

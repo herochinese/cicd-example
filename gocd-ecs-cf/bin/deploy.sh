@@ -48,7 +48,7 @@ else
 
   aws cloudformation wait stack-update-complete --stack-name $DEPLOY_STACK_NAME
   echo `aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME` > output.json
-  cat output.json
+  cat output.json |jq
   cat output.json |jq '.Stacks[0].Outputs[].OutputValue' > to.mail
   aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
     --subject  "Master, Check Out the Result of Deplouyment. `date`" \
