@@ -27,10 +27,10 @@ export ENV=dev
 3. Configure task definition & service in ECS cluster. Run CloudFormation template to deploy into ECS.
 
 ```
-export AWS_ACCESS_KEY_ID=***************************
-export AWS_SECRET_ACCESS_KEY=***************************
-export AWS_DEFAULT_REGION=***************************
-export AWS_ACCOUNT_ID=***************************
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_DEFAULT_REGION=
+export AWS_ACCOUNT_ID=
 
 ./setup_ecs.sh
 
