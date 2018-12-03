@@ -220,6 +220,14 @@ Resources:
               owner: "ec2-user"
               group: "ec2-user"
               authentication: "S3AccessCreds"
+            /home/ec2-user/daemon.json:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/cloudwatch4ecs/daemon.json
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
             /etc/ecs/ecs.config:
               content:
                 !Sub 'ECS_CLUSTER=${ecsCluster}'
@@ -271,6 +279,14 @@ Resources:
                 container_instance_id=$(curl -s http://169.254.169.254/1.0/meta-data/instance-id/)
                 sudo sed -i -e "s/{container_instance_id}/$container_instance_id/g" amazon-cloudwatch-agent.json
                 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+                cd /home/ec2-user
+                sudo cp /home/ec2-user/daemon.json /etc/docker/daemon.json
+                cd /etc/docker/
+                sudo sed -i -e "s/{aws_stack_name}/${AWS::StackName}/g" daemon.json
+                sudo sed -i -e "s/{cluster}/$cluster/g" daemon.json
+                sudo sed -i -e "s/{container_instance_id}/$container_instance_id/g" daemon.json
+                sudo systemctl restart docker
+
                 # ->Amazon Linux
                 # sudo service awslogs start
                 # sudo chkconfig awslogs on
