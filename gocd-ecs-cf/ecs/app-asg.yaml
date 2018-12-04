@@ -81,7 +81,7 @@ Resources:
         IpProtocol: TCP
         FromPort: '8000'
         ToPort: '9000'
-        CidrIp: 0.0.0.0/0
+        CidrIp: 10.0.0.0/16
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -92,7 +92,7 @@ Resources:
         IpProtocol: TCP
         FromPort: '8000'
         ToPort: '9000'
-        CidrIp: 10.0.0.0/16
+        CidrIp: 0.0.0.0/0
 
   LaunchConfigurationRole:
     Type: AWS::IAM::Role
