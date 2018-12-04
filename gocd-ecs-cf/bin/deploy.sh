@@ -25,7 +25,7 @@ then
   echo "Createing new stack -> $DEPLOY_STACK_NAME"
   aws cloudformation create-stack --stack-name $DEPLOY_STACK_NAME \
     --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-main.yaml`  \
-    --capabilities CAPABILITY_IAM \
+    --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --parameters \
     ParameterKey=baseStackName,ParameterValue=$BASE_STACK_NAME \
     ParameterKey=ecsStackName,ParameterValue=$ECS_STACK_NAME \
