@@ -25,6 +25,7 @@ then
   echo "Createing new stack -> $DEPLOY_STACK_NAME"
   aws cloudformation create-stack --stack-name $DEPLOY_STACK_NAME \
     --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-main.yaml`  \
+    --capabilities CAPABILITY_IAM \
     --parameters \
     ParameterKey=baseStackName,ParameterValue=$BASE_STACK_NAME \
     ParameterKey=ecsStackName,ParameterValue=$ECS_STACK_NAME \
@@ -47,13 +48,14 @@ else
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
 
   aws cloudformation wait stack-update-complete --stack-name $DEPLOY_STACK_NAME
-  echo `aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME` > output.json
-  cat output.json |jq
-  cat output.json |jq '.Stacks[0].Outputs[].OutputValue' > to.mail
-  aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
-    --subject  "Master, Check Out the Result of Deplouyment. `date`" \
-    --message file://to.mail
-
 
 fi
+
+echo `aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME` > output.json
+cat output.json |jq
+cat output.json |jq '.Stacks[0].Outputs[].OutputValue' > to.mail
+aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
+  --subject  "Master, Check Out the Result of Deplouyment. `date`" \
+  --message file://to.mail
+
 echo "Done"
