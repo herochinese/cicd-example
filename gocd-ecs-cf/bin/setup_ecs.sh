@@ -17,8 +17,12 @@ then
     --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-ecs.yaml`  \
     --parameters \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
+  isExist=$?
 
-  aws cloudformation wait stack-create-complete --stack-name $ECS_STACK_NAME
+  if [ $isExist -eq 0 ]
+  then
+    aws cloudformation wait stack-create-complete --stack-name $ECS_STACK_NAME
+  fi
 
 else
 
@@ -27,8 +31,12 @@ else
     --template-url `aws s3 presign s3://$BUCKET_NAME/ecs/app-ecs.yaml`  \
     --parameters \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
+  isExist=$?
 
-  aws cloudformation wait stack-update-complete --stack-name $ECS_STACK_NAME
+  if [ $isExist -eq 0 ]
+  then
+    aws cloudformation wait stack-update-complete --stack-name $ECS_STACK_NAME
+  fi
 
 fi
 echo "Done"

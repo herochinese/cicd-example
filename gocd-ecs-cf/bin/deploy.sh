@@ -32,8 +32,12 @@ then
     ParameterKey=env,ParameterValue=$ENV \
     ParameterKey=imageVersion,ParameterValue=$APP_VER \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
+  isExist=$?
 
-  aws cloudformation wait stack-create-complete --stack-name $DEPLOY_STACK_NAME
+  if [ $isExist -eq 0 ]
+  then
+    aws cloudformation wait stack-create-complete --stack-name $DEPLOY_STACK_NAME
+  fi
 
 else
 
@@ -46,8 +50,12 @@ else
     ParameterKey=env,ParameterValue=$ENV \
     ParameterKey=imageVersion,ParameterValue=$APP_VER \
     ParameterKey=serviceName,ParameterValue=$SERVICE_NAME
+  isExist=$?
 
-  aws cloudformation wait stack-update-complete --stack-name $DEPLOY_STACK_NAME
+  if [ $isExist -eq 0 ]
+  then
+    aws cloudformation wait stack-update-complete --stack-name $DEPLOY_STACK_NAME
+  fi
 
 fi
 
