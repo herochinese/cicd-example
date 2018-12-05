@@ -17,6 +17,8 @@ Parameters:
     # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
   s3Dns:
     Description:  s3 DNS
+    Type: String
+    Default: "s3.amazonaws.com"
   s3cf:
     Description:  S3 bucket name for storage cloudformation templates.
     Type: String

@@ -32,42 +32,43 @@ Parameters:
     Default: "demo-4-all"
   s3Dns:
     Description:  s3 DNS
+    Type: String
     Default: "s3.amazonaws.com"
 
 Mappings:
   RegionAMIMap:
     ap-south-1:
-    	AmazonLinux:   ami-06bcd1131b2f55803
+      AmazonLinux:   ami-06bcd1131b2f55803
     eu-west-3:
-    	AmazonLinux:   ami-051707cdba246187b
+      AmazonLinux:   ami-051707cdba246187b
     eu-west-2:
-    	AmazonLinux:   ami-0274e11dced17bb5b
+      AmazonLinux:   ami-0274e11dced17bb5b
     eu-west-1:
-    	AmazonLinux:   ami-09693313102a30b2c
+      AmazonLinux:   ami-09693313102a30b2c
     ap-northeast-3:
-    	AmazonLinux:   ami-079ab661fe705c5ac
+      AmazonLinux:   ami-079ab661fe705c5ac
     ap-northeast-2:
-    	AmazonLinux:   ami-0b4fdb56a00adb616
+      AmazonLinux:   ami-0b4fdb56a00adb616
     ap-northeast-1:
-    	AmazonLinux:   ami-0a2de1c3b415889d2
+      AmazonLinux:   ami-0a2de1c3b415889d2
     sa-east-1:
-    	AmazonLinux:   ami-0112d42866980b373
+      AmazonLinux:   ami-0112d42866980b373
     ca-central-1:
-    	AmazonLinux:   ami-076b4adb3f90cd384
+      AmazonLinux:   ami-076b4adb3f90cd384
     ap-southeast-1:
-    	AmazonLinux:   ami-08003045ea611340e
+      AmazonLinux:   ami-08003045ea611340e
     ap-southeast-2:
-    	AmazonLinux:   ami-08589eca6dcc9b39c
+      AmazonLinux:   ami-08589eca6dcc9b39c
     eu-central-1:
-    	AmazonLinux:   ami-0d277e62d322a5a31
+      AmazonLinux:   ami-0d277e62d322a5a31
     us-east-1:
-    	AmazonLinux:   ami-009d6802948d06e52
+      AmazonLinux:   ami-009d6802948d06e52
     us-east-2:
-    	AmazonLinux:   ami-02e680c4540db351e
+      AmazonLinux:   ami-02e680c4540db351e
     us-west-1:
-    	AmazonLinux:   ami-011b6930a81cd6aaf
+      AmazonLinux:   ami-011b6930a81cd6aaf
     us-west-2:
-    	AmazonLinux:   ami-01bbe152bf19d0289
+      AmazonLinux:   ami-01bbe152bf19d0289
 
 
 
