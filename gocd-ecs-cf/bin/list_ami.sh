@@ -20,4 +20,9 @@ done
 
 #'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
 #aws ec2 describe-images --owners amazon --filters 'Name=name,Values=amzn2-ami-hvm-2.0.????????-x86_64-gp2' 'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'
+
+#General Amazon Linux AMI
 #./list_ami.sh amzn2-ami-hvm-2.0.????????-x86_64-gp2
+
+#ECS-Optimized Amazon Linux AMI
+#./list_ami.sh amzn2-ami-ecs-hvm-2.0.????????-x86_64-ebs

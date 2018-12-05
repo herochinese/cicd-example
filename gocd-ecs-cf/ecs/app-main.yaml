@@ -38,37 +38,35 @@ Parameters:
 Mappings:
   RegionAMIMap:
     ap-south-1:
-      AmazonLinux:   ami-06bcd1131b2f55803
+     AmazonLinux:   ami-0b7c3be99909df6ef
     eu-west-3:
-      AmazonLinux:   ami-051707cdba246187b
+     AmazonLinux:   ami-0caadc4f0db31a303
     eu-west-2:
-      AmazonLinux:   ami-0274e11dced17bb5b
+     AmazonLinux:   ami-0b5225210a12d9951
     eu-west-1:
-      AmazonLinux:   ami-09693313102a30b2c
-    ap-northeast-3:
-      AmazonLinux:   ami-079ab661fe705c5ac
+     AmazonLinux:   ami-0acc9f8be17a41897
     ap-northeast-2:
-      AmazonLinux:   ami-0b4fdb56a00adb616
+     AmazonLinux:   ami-0bdc871079baf9649
     ap-northeast-1:
-      AmazonLinux:   ami-0a2de1c3b415889d2
+     AmazonLinux:   ami-0c38293d60d98af86
     sa-east-1:
-      AmazonLinux:   ami-0112d42866980b373
+     AmazonLinux:   ami-078146697425f25a7
     ca-central-1:
-      AmazonLinux:   ami-076b4adb3f90cd384
+     AmazonLinux:   ami-02c80e9173258d289
     ap-southeast-1:
-      AmazonLinux:   ami-08003045ea611340e
+     AmazonLinux:   ami-0e28ff4e3f1776d86
     ap-southeast-2:
-      AmazonLinux:   ami-08589eca6dcc9b39c
+     AmazonLinux:   ami-0eed1c915ea891aca
     eu-central-1:
-      AmazonLinux:   ami-0d277e62d322a5a31
+     AmazonLinux:   ami-055aa9664ef169e25
     us-east-1:
-      AmazonLinux:   ami-009d6802948d06e52
+     AmazonLinux:   ami-0a6b7e0cc0b1f464f
     us-east-2:
-      AmazonLinux:   ami-02e680c4540db351e
+     AmazonLinux:   ami-037a92bf1efdb11a2
     us-west-1:
-      AmazonLinux:   ami-011b6930a81cd6aaf
+     AmazonLinux:   ami-0184f498956de7db5
     us-west-2:
-      AmazonLinux:   ami-01bbe152bf19d0289
+     AmazonLinux:   ami-0c1f4871ebaae6d86
 
 
 Resources:
