@@ -55,6 +55,11 @@ Parameters:
     Description:  The target value for CPU metric.
     Type: String
     Default: 0.75
+  desiredCount:
+    Description:  The number of desired ec2-instance.
+    Type: Number
+    Default: 3
+
 
 Resources:
   Ec2SecurityGroup:
@@ -329,10 +334,9 @@ Resources:
       UserData:
         Fn::Base64:
           !Sub |
-            #!/bin/bash
+            #!/bin/bash -xe
             sudo yum update -y
-            sudo yum install aws-cfn-bootstrap awscli -y
-            set -e
+            sudo yum install -y aws-cfn-bootstrap awscli
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
 
@@ -408,7 +412,7 @@ Resources:
             - 2
             - Fn::GetAZs: ""
       Cooldown: 30
-      DesiredCapacity: 3
+      DesiredCapacity: !Ref desiredCount
       # HealthCheckGracePeriod: Integer     # optional
       # HealthCheckType: String     # optional
       # InstanceId: String     # optional
@@ -452,7 +456,11 @@ Resources:
           MinInstancesInService: '1'
           MaxBatchSize: '2'
           WaitOnResourceSignals: 'true'
-          PauseTime: PT10M
+          PauseTime: PT15M
+    CreationPolicy:
+      ResourceSignal:
+        Count:  !Ref desiredCount
+        Timeout: PT15M
 
 
   AppsvrAutoscalingPolicy:
