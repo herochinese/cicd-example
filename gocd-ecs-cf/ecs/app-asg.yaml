@@ -56,23 +56,8 @@ Resources:
       SecurityGroupIngress:
       -
         IpProtocol: TCP
-        FromPort: '80'
-        ToPort: '80'
-        CidrIp: 0.0.0.0/0
-      -
-        IpProtocol: TCP
-        FromPort: '443'
-        ToPort: '443'
-        CidrIp: 0.0.0.0/0
-      -
-        IpProtocol: TCP
-        FromPort: '22'
-        ToPort: '22'
-        CidrIp: 10.0.0.0/16
-      -
-        IpProtocol: TCP
-        FromPort: '8000'
-        ToPort: '9000'
+        FromPort: '0'
+        ToPort: '65535'
         CidrIp: 10.0.0.0/16
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
