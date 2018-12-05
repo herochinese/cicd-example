@@ -42,10 +42,17 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t2.small
+  volSize:
+    Description:  The size of root volume for ec2.
+    Type: Number
+    Default: 16
   ecsCluster:
     Description:  ECS Cluster for application running.
     Type: String
-
+  cpuTargetValue:
+    Description:  The target value for CPU metric.
+    Type: String
+    Default: 0.75
 
 Resources:
   Ec2SecurityGroup:
@@ -312,7 +319,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: /dev/sdm
           Ebs:
-            VolumeSize: 16
+            VolumeSize: !Ref volSize
             DeleteOnTermination: false
       SecurityGroups:
         -
@@ -421,9 +428,6 @@ Resources:
             - "GroupTerminatingInstances"
             - "GroupTotalInstances"
       MinSize: 1
-      # NotificationConfigurations:                # optional, list of NotificationConfiguration
-      #   - NotificationConfiguration
-      # PlacementGroup: String     # optional
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-appsvr-asg'
@@ -439,6 +443,29 @@ Resources:
           !Ref privateSubnet1b
         -
           !Ref privateSubnet1c
+    UpdatePolicy:
+        AutoScalingScheduledAction:
+          IgnoreUnmodifiedGroupSizeProperties: 'true'
+        AutoScalingRollingUpdate:
+          MinInstancesInService: '1'
+          MaxBatchSize: '2'
+          WaitOnResourceSignals: 'true'
+          PauseTime: PT10M
+
+
+  AppsvrAutoscalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AppsvrAutoscalingGroup
+      Cooldown: 600     # unit: second
+      PolicyType: TargetTrackingScaling
+      ScalingAdjustment: 1
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: !Ref cpuTargetValue
+
 
 Outputs:
   appElbTargetGroup:

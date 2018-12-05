@@ -41,6 +41,10 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t3.large
+  volSize:
+    Description:  The size of root volume for ec2.
+    Type: Number
+    Default: 40
 
 
 Resources:
@@ -318,7 +322,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: /dev/sdm
           Ebs:
-            VolumeSize: 16
+            VolumeSize: !Ref volSize
             DeleteOnTermination: false
       SecurityGroups:
         -
