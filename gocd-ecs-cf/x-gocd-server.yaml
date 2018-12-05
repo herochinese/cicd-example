@@ -9,6 +9,9 @@ Parameters:
   keyPairName:
     Description:  Key pair name for ec2.
     Type: String
+  ami:
+    Description:  Amazon image ID.
+    Type: String
   baseVpc:
     Description: VPC to launch virtual server in.
     Type: AWS::EC2::VPC::Id
@@ -38,18 +41,6 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t3.large
-
-Mappings:
-  RegionAMIMap:
-    ap-northeast-1:
-      AmazonLinux:  ami-cbf90ecb
-    us-east-1:
-      AmazonLinux:  ami-009d6802948d06e52
-    ap-southeast-1:
-      AmazonLinux:  ami-51a7aa2d
-    ap-southeast-2:
-      AmazonLinux:  ami-47c21a25
-
 
 
 Resources:
@@ -320,7 +311,7 @@ Resources:
       BlockDeviceMappings:                # optional, list of BlockDeviceMapping
         - BlockDeviceMapping
       IamInstanceProfile: !Ref Ec2InstanceProfile
-      ImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+      ImageId: !Ref ami
       InstanceMonitoring: true
       InstanceType: !Ref instanceType
       KeyName: !Ref keyPairName
