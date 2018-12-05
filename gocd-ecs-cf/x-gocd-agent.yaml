@@ -355,14 +355,14 @@ Resources:
           !Ref privateSubnet1b
         -
           !Ref privateSubnet1c
-    UpdatePolicy:
-        AutoScalingScheduledAction:
-          IgnoreUnmodifiedGroupSizeProperties: 'true'
-        AutoScalingRollingUpdate:
-          MinInstancesInService: '1'
-          MaxBatchSize: '2'
-          WaitOnResourceSignals: 'true'
-          PauseTime: PT10M
+    # UpdatePolicy:
+    #     AutoScalingScheduledAction:
+    #       IgnoreUnmodifiedGroupSizeProperties: 'true'
+    #     AutoScalingRollingUpdate:
+    #       MinInstancesInService: '1'
+    #       MaxBatchSize: '2'
+    #       WaitOnResourceSignals: 'true'
+    #       PauseTime: PT10M
 
   GAAutoscalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
