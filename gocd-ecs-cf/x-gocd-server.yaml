@@ -332,7 +332,7 @@ Resources:
           !Sub |
             #!/bin/bash -xe
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource GServerLaunchConfiguration --region ${AWS::Region}
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource GServerLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource GServerAutoscalingGroup --region ${AWS::Region}
 
 
   GServerElasticLoadBalancing:
@@ -448,6 +448,10 @@ Resources:
           !Ref privateSubnet1b
         -
           !Ref privateSubnet1c
+    CreationPolicy:
+      ResourceSignal:
+        Count:  1
+        Timeout: PT15M
 
   GAgentElasticLoadBalancing:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer

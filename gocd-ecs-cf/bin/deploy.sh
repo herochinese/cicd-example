@@ -37,6 +37,7 @@ then
   if [ $isExist -eq 0 ]
   then
     aws cloudformation wait stack-create-complete --stack-name $DEPLOY_STACK_NAME
+    isExist=$?
   fi
 
 else

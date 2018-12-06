@@ -51,7 +51,12 @@ Parameters:
   cpuTargetValue:
     Description:  The target value for CPU metric.
     Type: String
-    Default: 0.75
+    Default: 75.0
+  desiredCount:
+    Description:  The number of desired ec2-instance.
+    Type: Number
+    Default: 3
+
 
 Resources:
   Ec2SecurityGroup:
@@ -294,7 +299,7 @@ Resources:
           !Sub |
             #!/bin/bash -xe
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource GAgentLaunchConfiguration --region ${AWS::Region}
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource GAgentLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource GAgentAutoscalingGroup --region ${AWS::Region}
 
 
   GAgentAutoscalingGroup:
@@ -315,7 +320,7 @@ Resources:
             - 2
             - Fn::GetAZs: ""
       Cooldown: 30
-      DesiredCapacity: 3
+      DesiredCapacity: !Ref desiredCount
       # HealthCheckGracePeriod: Integer     # optional
       # HealthCheckType: String     # optional
       # InstanceId: String     # optional
@@ -355,14 +360,19 @@ Resources:
           !Ref privateSubnet1b
         -
           !Ref privateSubnet1c
-    # UpdatePolicy:
-    #     AutoScalingScheduledAction:
-    #       IgnoreUnmodifiedGroupSizeProperties: 'true'
-    #     AutoScalingRollingUpdate:
-    #       MinInstancesInService: '1'
-    #       MaxBatchSize: '2'
-    #       WaitOnResourceSignals: 'true'
-    #       PauseTime: PT10M
+    UpdatePolicy:
+        AutoScalingScheduledAction:
+          IgnoreUnmodifiedGroupSizeProperties: 'true'
+        AutoScalingRollingUpdate:
+          MinInstancesInService: '1'
+          MaxBatchSize: '2'
+          WaitOnResourceSignals: 'true'
+          MinSuccessfulInstancesPercent: 100
+          # PauseTime: PT15M
+    CreationPolicy:
+      ResourceSignal:
+        Count:  !Ref desiredCount
+        Timeout: PT15M
 
   GAAutoscalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy

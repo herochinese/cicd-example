@@ -18,7 +18,6 @@ Parameters:
   s3Dns:
     Description:  s3 DNS
     Type: String
-    Default: "s3.amazonaws.com"
   s3cf:
     Description:  S3 bucket name for storage cloudformation templates.
     Type: String
@@ -54,7 +53,7 @@ Parameters:
   cpuTargetValue:
     Description:  The target value for CPU metric.
     Type: String
-    Default: 0.75
+    Default: 75.0
   desiredCount:
     Description:  The number of desired ec2-instance.
     Type: Number
@@ -204,17 +203,13 @@ Resources:
         config:
           files:
             /home/ec2-user/amazon-cloudwatch-agent-ecs.json:
-              source: !Sub
-                - https://${s3Dns}/${s3Name}/cloudwatch4ecs/amazon-cloudwatch-agent-ecs.json
-                - { s3Name: !Ref s3cf }
+              source: !Sub https://${s3Dns}/${s3cf}/cloudwatch4ecs/amazon-cloudwatch-agent-ecs.json
               mode: "000644"
               owner: "ec2-user"
               group: "ec2-user"
               authentication: "S3AccessCreds"
             /home/ec2-user/daemon.json:
-              source: !Sub
-                - https://${s3Dns}/${s3Name}/cloudwatch4ecs/daemon.json
-                - { s3Name: !Ref s3cf }
+              source: !Sub https://${s3Dns}/${s3cf}/cloudwatch4ecs/daemon.json
               mode: "000644"
               owner: "ec2-user"
               group: "ec2-user"
@@ -229,7 +224,7 @@ Resources:
                 #sudo yum update -y
                 sudo yum install -y jq wget
                 sudo yum install -y https://${s3Dns}/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-                sudo yum install -y awslogs
+                # sudo yum install -y awslogs
                 #ssm agent
                 # ->Amazon Linux
                 # sudo start amazon-ssm-agent
@@ -290,7 +285,7 @@ Resources:
               group: "ec2-user"
 
           sources:
-              /home/ec2-user/cloudwatch: https://${s3Dns}/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+              /home/ec2-user/cloudwatch: !Sub https://${s3Dns}/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
 
           commands:
             # getConfig:
@@ -303,7 +298,7 @@ Resources:
             #   cwd: "/home/ec2-user"
             #   ignoreErrors: false
             agent1:
-              command:  "./first-run.sh"
+              command:  "./first-run.sh >./run.log 2>./run.log"
               env:
                 STACK_NAME: !Sub '${AWS::StackName}'
                 AWS_DEFAULT_REGION: !Sub '${AWS::Region}'
@@ -334,12 +329,13 @@ Resources:
       UserData:
         Fn::Base64:
           !Sub |
-            #!/bin/bash -xe
+            #!/bin/bash
+            set -e
             sudo yum update -y
             sudo yum install -y aws-cfn-bootstrap awscli
-            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
 
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrAutoscalingGroup --region ${AWS::Region}
 
   AppsvrElasticLoadBalancing:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -456,11 +452,13 @@ Resources:
           MinInstancesInService: '1'
           MaxBatchSize: '2'
           WaitOnResourceSignals: 'true'
-          PauseTime: PT15M
+          MinSuccessfulInstancesPercent: 100
+          # PauseTime: PT15M
     CreationPolicy:
       ResourceSignal:
         Count:  !Ref desiredCount
         Timeout: PT15M
+
 
 
   AppsvrAutoscalingPolicy:
@@ -470,7 +468,7 @@ Resources:
       AutoScalingGroupName: !Ref AppsvrAutoscalingGroup
       Cooldown: 600     # unit: second
       PolicyType: TargetTrackingScaling
-      ScalingAdjustment: 1
+      # ScalingAdjustment: 1 - not supported for a TargetTracking policy
       TargetTrackingConfiguration:
         PredefinedMetricSpecification:
           PredefinedMetricType: ASGAverageCPUUtilization

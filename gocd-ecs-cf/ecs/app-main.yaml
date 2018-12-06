@@ -101,13 +101,12 @@ Resources:
             !Sub '${baseStackName}-${env}-pri1cSubnet'
         instanceType: !Ref instanceType
         ecsCluster: !Sub '${ecsStackName}-ecs-cluster'
+        s3Dns: !Ref s3Dns
 
       Tags:
         - Key: Name
           Value: ec2-asg
-      TemplateURL:  !Sub
-          - https://${s3Dns}/${s3Name}/ecs/app-asg.yaml
-          - { s3Name: !Ref s3cf }
+      TemplateURL:  !Sub https://${s3Dns}/${s3cf}/ecs/app-asg.yaml
       TimeoutInMinutes: "60"
 
 
@@ -128,9 +127,7 @@ Resources:
       Tags:
         - Key: Name
           Value: ecs-deploy
-      TemplateURL:  !Sub
-          - https://${s3Dns}/${s3Name}/ecs/app-deploy.yaml
-          - { s3Name: !Ref s3cf }
+      TemplateURL:  !Sub https://${s3Dns}/${s3cf}/ecs/app-deploy.yaml
       TimeoutInMinutes: "60"
 
 Outputs:

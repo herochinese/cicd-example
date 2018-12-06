@@ -228,4 +228,5 @@ Resources:
           Value: Bastion
     CreationPolicy:
       ResourceSignal:
+        Count:  1
         Timeout: PT5M
