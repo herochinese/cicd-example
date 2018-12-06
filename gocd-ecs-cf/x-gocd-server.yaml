@@ -243,6 +243,30 @@ Resources:
               owner: "ec2-user"
               group: "ec2-user"
               authentication: "S3AccessCreds"
+            /home/ec2-user/inst/gocd-server.service:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/gocd/gocd-server.service
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/inst/gocd-agent.service:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/gocd/gocd-agent.service
+                - { s3Name: !Ref s3cf }
+              mode: "000644"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
+            /home/ec2-user/inst/gocd_restart.sh:
+              source: !Sub
+                - https://s3.amazonaws.com/${s3Name}/gocd/gocd_restart.sh
+                - { s3Name: !Ref s3cf }
+              mode: "000755"
+              owner: "ec2-user"
+              group: "ec2-user"
+              authentication: "S3AccessCreds"
             /home/ec2-user/inst/jdk-8u191-linux-x64.tar.gz:
               source: !Sub
                 - https://s3.amazonaws.com/${s3Name}/gocd/jdk-8u191-linux-x64.tar.gz
@@ -269,13 +293,16 @@ Resources:
                 sudo amazon-linux-extras install docker -y
                 cd /home/ec2-user/cloudwatch
                 sudo ./install.sh
+
                 cd /home/ec2-user
                 sudo cp /home/ec2-user/inst/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/.
+
                 cd /opt/aws/amazon-cloudwatch-agent/etc
                 sudo sed -i -e "s/{aws_stack_name}/${AWS::StackName}/g" amazon-cloudwatch-agent.json
                 instance_id=$(curl -s http://169.254.169.254/1.0/meta-data/instance-id/)
                 sudo sed -i -e "s/{instance_id}/$instance_id/g" amazon-cloudwatch-agent.json
                 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+
                 cd /home/ec2-user/
                 tar xzvf inst/jdk-8u191-linux-x64.tar.gz
                 unzip inst/go-agent-18.10.0-7703.zip
@@ -284,8 +311,21 @@ Resources:
                 cp inst/user-password.properties go-server-18.10.0/config/user-password.properties
                 sudo chown -R ec2-user:ec2-user go-agent-18.10.0 go-server-18.10.0 jdk1.8.0_191
                 cat inst/bashrc.ext >> .bash_profile
+
                 sudo systemctl start docker
                 sudo usermod -aG docker ec2-user
+
+                sudo cp /home/ec2-user/inst/gocd-server.service /etc/systemd/system/.
+                sudo chmod 664 /etc/systemd/system/gocd-server.service
+                sudo systemctl daemon-reload
+                sudo systemctl enable gocd-server.service
+                sudo systemctl start gocd-server.service
+                sleep 120
+                sudo cp /home/ec2-user/inst/gocd-agent.service /etc/systemd/system/.
+                sudo chmod 664 /etc/systemd/system/gocd-agent.service
+                sudo systemctl daemon-reload
+                sudo systemctl enable gocd-agent.service
+                sudo systemctl start gocd-agent.service
 
               mode: "000755"
               owner: "ec2-user"

@@ -157,6 +157,7 @@ Resources:
 
   GoCDAgent:
     Type: AWS::CloudFormation::Stack
+    DependsOn: GoCDServer
     Properties:
       Parameters:
         keyPairName:  !Ref keyPairName

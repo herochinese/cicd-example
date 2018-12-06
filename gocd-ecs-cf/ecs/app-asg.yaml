@@ -53,7 +53,7 @@ Parameters:
   cpuTargetValue:
     Description:  The target value for CPU metric.
     Type: String
-    Default: 75.0
+    Default: 45.0
   desiredCount:
     Description:  The number of desired ec2-instance.
     Type: Number
@@ -429,7 +429,7 @@ Resources:
             - "GroupStandbyInstances"
             - "GroupTerminatingInstances"
             - "GroupTotalInstances"
-      MinSize: 1
+      MinSize: !Ref desiredCount
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-appsvr-asg'
