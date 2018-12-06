@@ -10,8 +10,13 @@ import (
 type User struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
+	Nationality string `json:"nationality"`
 	Company	string `json:"company"`
+	Department string `json:"department"`
 	Age       int    `json:"age"`
+	Selfie	string `json:"selfie"`
+	Fields string `json:"fields"`
+	Twitter string `json:"twitter"`
 }
 
 
@@ -33,10 +38,15 @@ func main() {
 
 	http.HandleFunc("/encode", func(w http.ResponseWriter, r *http.Request) {
 		peter := User{
-			Firstname: "John",
-			Lastname:  "Doe",
+			Firstname: "Werner",
+			Lastname:  "Vogels",
+			Nationality: "Dutch",
 			Company:  "Amazon Web Services",
-			Age:       25,
+			Department: "Administration",
+			Age:       60,
+			Selfie: "https://en.wikipedia.org/wiki/Werner_Vogels#/media/File:WernerVogels.JPG",
+			Fields: "Distributed computing",
+			Twitter: "@Werner",
 		}
 		fmt.Println("Reponse -> ", peter)
 		json.NewEncoder(w).Encode(peter)

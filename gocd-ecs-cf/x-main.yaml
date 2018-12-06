@@ -30,6 +30,47 @@ Parameters:
     Description:  Key pair name for ec2.
     Type: String
     Default: "demo-4-all"
+  s3Dns:
+    Description:  s3 DNS
+    Type: String
+    Default: "s3.amazonaws.com"
+
+Mappings:
+  RegionAMIMap:
+    ap-south-1:
+      AmazonLinux:   ami-06bcd1131b2f55803
+    eu-west-3:
+      AmazonLinux:   ami-051707cdba246187b
+    eu-west-2:
+      AmazonLinux:   ami-0274e11dced17bb5b
+    eu-west-1:
+      AmazonLinux:   ami-09693313102a30b2c
+    ap-northeast-3:
+      AmazonLinux:   ami-079ab661fe705c5ac
+    ap-northeast-2:
+      AmazonLinux:   ami-0b4fdb56a00adb616
+    ap-northeast-1:
+      AmazonLinux:   ami-0a2de1c3b415889d2
+    sa-east-1:
+      AmazonLinux:   ami-0112d42866980b373
+    ca-central-1:
+      AmazonLinux:   ami-076b4adb3f90cd384
+    ap-southeast-1:
+      AmazonLinux:   ami-08003045ea611340e
+    ap-southeast-2:
+      AmazonLinux:   ami-08589eca6dcc9b39c
+    eu-central-1:
+      AmazonLinux:   ami-0d277e62d322a5a31
+    us-east-1:
+      AmazonLinux:   ami-009d6802948d06e52
+    us-east-2:
+      AmazonLinux:   ami-02e680c4540db351e
+    us-west-1:
+      AmazonLinux:   ami-011b6930a81cd6aaf
+    us-west-2:
+      AmazonLinux:   ami-01bbe152bf19d0289
+
+
 
 Resources:
   Network4Dev:
@@ -43,7 +84,7 @@ Resources:
         - Key: Name
           Value: Network4Dev
       TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+          - https://${s3Dns}/${s3Name}/x-network.yaml
           - { s3Name: !Ref s3cf }
       TimeoutInMinutes: "60"
 
@@ -58,7 +99,7 @@ Resources:
   #       - Key: Name
   #         Value: Network4Test
   #     TemplateURL:  !Sub
-  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - https://${s3Dns}/${s3Name}/x-network.yaml
   #         - { s3Name: !Ref s3cf }
   #     TimeoutInMinutes: "60"
 
@@ -73,7 +114,7 @@ Resources:
   #       - Key: Name
   #         Value: Network4Qual
   #     TemplateURL:  !Sub
-  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - https://${s3Dns}/${s3Name}/x-network.yaml
   #         - { s3Name: !Ref s3cf }
   #     TimeoutInMinutes: "60"
   #
@@ -88,7 +129,7 @@ Resources:
   #       - Key: Name
   #         Value: Network4Prod
   #     TemplateURL:  !Sub
-  #         - https://s3.amazonaws.com/${s3Name}/x-network.yaml
+  #         - https://${s3Dns}/${s3Name}/x-network.yaml
   #         - { s3Name: !Ref s3cf }
   #     TimeoutInMinutes: "60"
 
@@ -97,6 +138,7 @@ Resources:
     Properties:
       Parameters:
         keyPairName:  !Ref keyPairName
+        ami: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
         baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
         s3cf: !Ref s3cf
         publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
@@ -109,15 +151,17 @@ Resources:
         - Key: Name
           Value: GoCD-Server
       TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/x-gocd-server.yaml
+          - https://${s3Dns}/${s3Name}/x-gocd-server.yaml
           - { s3Name: !Ref s3cf }
       TimeoutInMinutes: "60"
 
   GoCDAgent:
     Type: AWS::CloudFormation::Stack
+    DependsOn: GoCDServer
     Properties:
       Parameters:
         keyPairName:  !Ref keyPairName
+        ami: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
         baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
         s3cf: !Ref s3cf
         publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
@@ -131,7 +175,7 @@ Resources:
         - Key: Name
           Value: GoCD-Agent
       TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/x-gocd-agent.yaml
+          - https://${s3Dns}/${s3Name}/x-gocd-agent.yaml
           - { s3Name: !Ref s3cf }
       TimeoutInMinutes: "60"
 
@@ -140,6 +184,7 @@ Resources:
     Properties:
       Parameters:
         keyPairName:  !Ref keyPairName
+        ami: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
         baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
         s3cf: !Ref s3cf
         publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
@@ -149,7 +194,7 @@ Resources:
         - Key: Name
           Value: GoCD-Agent
       TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/x-bastion.yaml
+          - https://${s3Dns}/${s3Name}/x-bastion.yaml
           - { s3Name: !Ref s3cf }
       TimeoutInMinutes: "60"
 

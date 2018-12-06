@@ -30,6 +30,43 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t3.small
+  s3Dns:
+    Description:  s3 DNS
+    Type: String
+    Default: "s3.amazonaws.com"
+
+Mappings:
+  RegionAMIMap:
+    ap-south-1:
+     AmazonLinux:   ami-0b7c3be99909df6ef
+    eu-west-3:
+     AmazonLinux:   ami-0caadc4f0db31a303
+    eu-west-2:
+     AmazonLinux:   ami-0b5225210a12d9951
+    eu-west-1:
+     AmazonLinux:   ami-0acc9f8be17a41897
+    ap-northeast-2:
+     AmazonLinux:   ami-0bdc871079baf9649
+    ap-northeast-1:
+     AmazonLinux:   ami-0c38293d60d98af86
+    sa-east-1:
+     AmazonLinux:   ami-078146697425f25a7
+    ca-central-1:
+     AmazonLinux:   ami-02c80e9173258d289
+    ap-southeast-1:
+     AmazonLinux:   ami-0e28ff4e3f1776d86
+    ap-southeast-2:
+     AmazonLinux:   ami-0eed1c915ea891aca
+    eu-central-1:
+     AmazonLinux:   ami-055aa9664ef169e25
+    us-east-1:
+     AmazonLinux:   ami-0a6b7e0cc0b1f464f
+    us-east-2:
+     AmazonLinux:   ami-037a92bf1efdb11a2
+    us-west-1:
+     AmazonLinux:   ami-0184f498956de7db5
+    us-west-2:
+     AmazonLinux:   ami-0c1f4871ebaae6d86
 
 
 Resources:
@@ -39,6 +76,7 @@ Resources:
     Properties:
       Parameters:
         keyPairName:  !Ref keyPairName
+        ami: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
         baseVpc:
           Fn::ImportValue:
             !Sub '${baseStackName}-${env}-baseVpc'
@@ -63,13 +101,12 @@ Resources:
             !Sub '${baseStackName}-${env}-pri1cSubnet'
         instanceType: !Ref instanceType
         ecsCluster: !Sub '${ecsStackName}-ecs-cluster'
+        s3Dns: !Ref s3Dns
 
       Tags:
         - Key: Name
           Value: ec2-asg
-      TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/ecs/app-asg.yaml
-          - { s3Name: !Ref s3cf }
+      TemplateURL:  !Sub https://${s3Dns}/${s3cf}/ecs/app-asg.yaml
       TimeoutInMinutes: "60"
 
 
@@ -90,9 +127,7 @@ Resources:
       Tags:
         - Key: Name
           Value: ecs-deploy
-      TemplateURL:  !Sub
-          - https://s3.amazonaws.com/${s3Name}/ecs/app-deploy.yaml
-          - { s3Name: !Ref s3cf }
+      TemplateURL:  !Sub https://${s3Dns}/${s3cf}/ecs/app-deploy.yaml
       TimeoutInMinutes: "60"
 
 Outputs:

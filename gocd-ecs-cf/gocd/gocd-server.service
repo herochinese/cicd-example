@@ -1,0 +1,10 @@
+[Unit]
+Description=GoCD-Server
+After=amazon-cloudwatch-agent.service
+
+[Service]
+User=ec2-user
+ExecStart=/home/ec2-user/inst/gocd_restart.sh server
+
+[Install]
+WantedBy=multi-user.target

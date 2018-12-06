@@ -37,6 +37,7 @@ then
   if [ $isExist -eq 0 ]
   then
     aws cloudformation wait stack-create-complete --stack-name $DEPLOY_STACK_NAME
+    isExist=$?
   fi
 
 else
@@ -55,15 +56,26 @@ else
   if [ $isExist -eq 0 ]
   then
     aws cloudformation wait stack-update-complete --stack-name $DEPLOY_STACK_NAME
+    isExist=$?
   fi
 
 fi
 
-echo `aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME` > output.json
-cat output.json |jq
-echo "Click URL -> http://"`cat output.json |jq '.Stacks[0].Outputs[].OutputValue' |grep -v "arn:aws"|sed -e "s/\"//g"`":8080/encode" > to.mail
-aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
-  --subject  "Master, Check Out the Result of Deplouyment. `date`" \
-  --message file://to.mail
+if [ $isExist -eq 0 ]
+then
+  echo `aws cloudformation describe-stacks --stack-name $DEPLOY_STACK_NAME` > output.json
+  cat output.json |jq
+  echo "Click URL -> http://"`cat output.json |jq '.Stacks[0].Outputs[].OutputValue' |grep -v "arn:aws"|sed -e "s/\"//g"`":8080/encode" > to.mail
+  aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
+    --subject  "Master, Check Out the Result of Deplouyment. `date`" \
+    --message file://to.mail
 
-echo "Done"
+  echo "Done"
+else
+  echo "Operation was failed."
+  echo "Deployment was falied and contact with administrator, please!!!" > to.mail
+  aws sns publish --topic-arn "arn:aws:sns:us-east-1:530820415924:cicd-notification" \
+    --subject  "Master, deplouyment was falied. `date`" \
+    --message file://to.mail
+  exit 255
+fi

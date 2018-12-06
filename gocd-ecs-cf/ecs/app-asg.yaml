@@ -8,10 +8,16 @@ Parameters:
   keyPairName:
     Description:  Key pair name for ec2.
     Type: String
+  ami:
+    Description:  Amazon image ID.
+    Type: String
   baseVpc:
     Description: VPC to launch virtual server in.
     Type: AWS::EC2::VPC::Id
     # Default:  !GetAtt networkStack.Outputs.baseVpcOutput
+  s3Dns:
+    Description:  s3 DNS
+    Type: String
   s3cf:
     Description:  S3 bucket name for storage cloudformation templates.
     Type: String
@@ -37,22 +43,21 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t2.small
+  volSize:
+    Description:  The size of root volume for ec2.
+    Type: Number
+    Default: 16
   ecsCluster:
     Description:  ECS Cluster for application running.
     Type: String
-
-
-Mappings:
-  RegionAMIMap:
-    ap-northeast-1:
-      AmazonLinux:  ami-cbf90ecb
-    us-east-1:
-      AmazonLinux:  ami-0a6b7e0cc0b1f464f
-    ap-southeast-1:
-      AmazonLinux:  ami-51a7aa2d
-    ap-southeast-2:
-      AmazonLinux:  ami-47c21a25
-
+  cpuTargetValue:
+    Description:  The target value for CPU metric.
+    Type: String
+    Default: 45.0
+  desiredCount:
+    Description:  The number of desired ec2-instance.
+    Type: Number
+    Default: 3
 
 
 Resources:
@@ -64,23 +69,8 @@ Resources:
       SecurityGroupIngress:
       -
         IpProtocol: TCP
-        FromPort: '80'
-        ToPort: '80'
-        CidrIp: 0.0.0.0/0
-      -
-        IpProtocol: TCP
-        FromPort: '443'
-        ToPort: '443'
-        CidrIp: 0.0.0.0/0
-      -
-        IpProtocol: TCP
-        FromPort: '22'
-        ToPort: '22'
-        CidrIp: 10.0.0.0/16
-      -
-        IpProtocol: TCP
-        FromPort: '8000'
-        ToPort: '9000'
+        FromPort: '0'
+        ToPort: '65535'
         CidrIp: 10.0.0.0/16
   ELBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -213,17 +203,13 @@ Resources:
         config:
           files:
             /home/ec2-user/amazon-cloudwatch-agent-ecs.json:
-              source: !Sub
-                - https://s3.amazonaws.com/${s3Name}/cloudwatch4ecs/amazon-cloudwatch-agent-ecs.json
-                - { s3Name: !Ref s3cf }
+              source: !Sub https://${s3Dns}/${s3cf}/cloudwatch4ecs/amazon-cloudwatch-agent-ecs.json
               mode: "000644"
               owner: "ec2-user"
               group: "ec2-user"
               authentication: "S3AccessCreds"
             /home/ec2-user/daemon.json:
-              source: !Sub
-                - https://s3.amazonaws.com/${s3Name}/cloudwatch4ecs/daemon.json
-                - { s3Name: !Ref s3cf }
+              source: !Sub https://${s3Dns}/${s3cf}/cloudwatch4ecs/daemon.json
               mode: "000644"
               owner: "ec2-user"
               group: "ec2-user"
@@ -237,8 +223,8 @@ Resources:
                 #!/bin/bash
                 #sudo yum update -y
                 sudo yum install -y jq wget
-                sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-                sudo yum install -y awslogs
+                sudo yum install -y https://${s3Dns}/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+                # sudo yum install -y awslogs
                 #ssm agent
                 # ->Amazon Linux
                 # sudo start amazon-ssm-agent
@@ -299,7 +285,7 @@ Resources:
               group: "ec2-user"
 
           sources:
-              /home/ec2-user/cloudwatch: https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+              /home/ec2-user/cloudwatch: !Sub https://${s3Dns}/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
 
           commands:
             # getConfig:
@@ -312,7 +298,7 @@ Resources:
             #   cwd: "/home/ec2-user"
             #   ignoreErrors: false
             agent1:
-              command:  "./first-run.sh"
+              command:  "./first-run.sh >./run.log 2>./run.log"
               env:
                 STACK_NAME: !Sub '${AWS::StackName}'
                 AWS_DEFAULT_REGION: !Sub '${AWS::Region}'
@@ -328,14 +314,14 @@ Resources:
       BlockDeviceMappings:                # optional, list of BlockDeviceMapping
         - BlockDeviceMapping
       IamInstanceProfile: !Ref Ec2InstanceProfile
-      ImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+      ImageId: !Ref ami
       InstanceMonitoring: true
       InstanceType: !Ref instanceType
       KeyName: !Ref keyPairName
       BlockDeviceMappings:
         - DeviceName: /dev/sdm
           Ebs:
-            VolumeSize: 16
+            VolumeSize: !Ref volSize
             DeleteOnTermination: false
       SecurityGroups:
         -
@@ -344,12 +330,12 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            sudo yum update -y
-            sudo yum install aws-cfn-bootstrap awscli -y
             set -e
-            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
-            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
+            sudo yum update -y
+            sudo yum install -y aws-cfn-bootstrap awscli
 
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AppsvrLaunchConfiguration --region ${AWS::Region}
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AppsvrAutoscalingGroup --region ${AWS::Region}
 
   AppsvrElasticLoadBalancing:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -422,7 +408,7 @@ Resources:
             - 2
             - Fn::GetAZs: ""
       Cooldown: 30
-      DesiredCapacity: 3
+      DesiredCapacity: !Ref desiredCount
       # HealthCheckGracePeriod: Integer     # optional
       # HealthCheckType: String     # optional
       # InstanceId: String     # optional
@@ -443,10 +429,7 @@ Resources:
             - "GroupStandbyInstances"
             - "GroupTerminatingInstances"
             - "GroupTotalInstances"
-      MinSize: 1
-      # NotificationConfigurations:                # optional, list of NotificationConfiguration
-      #   - NotificationConfiguration
-      # PlacementGroup: String     # optional
+      MinSize: !Ref desiredCount
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-appsvr-asg'
@@ -462,6 +445,35 @@ Resources:
           !Ref privateSubnet1b
         -
           !Ref privateSubnet1c
+    UpdatePolicy:
+        AutoScalingScheduledAction:
+          IgnoreUnmodifiedGroupSizeProperties: 'true'
+        AutoScalingRollingUpdate:
+          MinInstancesInService: '1'
+          MaxBatchSize: '2'
+          WaitOnResourceSignals: 'true'
+          MinSuccessfulInstancesPercent: 100
+          # PauseTime: PT15M
+    CreationPolicy:
+      ResourceSignal:
+        Count:  !Ref desiredCount
+        Timeout: PT15M
+
+
+
+  AppsvrAutoscalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AppsvrAutoscalingGroup
+      Cooldown: 600     # unit: second
+      PolicyType: TargetTrackingScaling
+      # ScalingAdjustment: 1 - not supported for a TargetTracking policy
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: !Ref cpuTargetValue
+
 
 Outputs:
   appElbTargetGroup:

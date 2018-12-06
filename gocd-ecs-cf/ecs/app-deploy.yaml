@@ -157,7 +157,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     DependsOn: ServiceLogGroup
     Properties:
-      NetworkMode: host
+      NetworkMode: bridge
       ContainerDefinitions:
       - Name:
           !Sub '${serviceName}'
@@ -177,7 +177,7 @@ Resources:
 
         PortMappings:
           - ContainerPort: !Ref appContainerPort
-            HostPort: !Ref appHostPort
+            HostPort: 0
             Protocol: tcp
 
   AppService:

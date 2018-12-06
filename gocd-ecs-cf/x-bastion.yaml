@@ -9,6 +9,9 @@ Parameters:
   keyPairName:
     Description:  Key pair name for ec2.
     Type: String
+  ami:
+    Description:  Amazon image ID.
+    Type: String
   baseVpc:
     Description: VPC to launch virtual server in.
     Type: AWS::EC2::VPC::Id
@@ -29,18 +32,6 @@ Parameters:
     Description:  instance tyep for ec2.
     Type: String
     Default: t2.small
-
-Mappings:
-  RegionAMIMap:
-    ap-northeast-1:
-      AmazonLinux:  ami-cbf90ecb
-    us-east-1:
-      AmazonLinux:  ami-009d6802948d06e52
-    ap-southeast-1:
-      AmazonLinux:  ami-51a7aa2d
-    ap-southeast-2:
-      AmazonLinux:  ami-47c21a25
-
 
 
 Resources:
@@ -209,7 +200,7 @@ Resources:
 
     Properties:
       #AdditionalInfo: String     # optional
-      ImageId:  !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+      ImageId:  !Ref ami
       InstanceType: !Ref instanceType
       IamInstanceProfile: !Ref Ec2InstanceProfile
       KeyName: !Ref keyPairName
@@ -237,4 +228,5 @@ Resources:
           Value: Bastion
     CreationPolicy:
       ResourceSignal:
+        Count:  1
         Timeout: PT5M
