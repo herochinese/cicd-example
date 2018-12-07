@@ -9,6 +9,7 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
 build:
+	$(GOCMD) get -v github.com/stretchr/testify/assert
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:
 	$(GOTEST) -v ./...
