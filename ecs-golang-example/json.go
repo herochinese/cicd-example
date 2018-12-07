@@ -50,12 +50,12 @@ func DecodeR(w http.ResponseWriter, r *http.Request) {
 
 func EncodeU(w http.ResponseWriter, r *http.Request) {
 	peter := User{
-		Firstname: "Werner",
-		Lastname:  "Vogels",
+		Firstname: "Chuan",
+		Lastname:  "CHen",
 		Nationality: "Dutch",
 		Company:  "Amazon Web Services",
 		Department: "Administration",
-		Age:       60,
+		Age:       30,
 		Selfie: "https://en.wikipedia.org/wiki/Werner_Vogels#/media/File:WernerVogels.JPG",
 		Fields: "Distributed computing",
 		Twitter: "@Werner",
