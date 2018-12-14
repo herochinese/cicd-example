@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: airdex-pod
+  labels:
+    app: airdex
+spec:
+  containers:
+    - name: airdex-container
+      image: k8s/airdex
+
