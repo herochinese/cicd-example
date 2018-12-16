@@ -4,6 +4,7 @@ metadata:
   name: airdex-pod
   labels:
     app: airdex
+    tier: backend
 spec:
   containers:
     - name: airdex-container

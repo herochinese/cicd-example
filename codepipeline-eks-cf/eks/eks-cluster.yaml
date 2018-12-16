@@ -1,0 +1,77 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  Setup EKS cluster in specific VPN.
+
+Parameters:
+  baseVpc:
+    Description: VPC to launch virtual server in.
+    Type: AWS::EC2::VPC::Id
+  subnets:
+    Description: The subnets where EKS cluster can be created.
+    Type: List<AWS::EC2::Subnet::Id>
+  eksClusterName:
+    Description:  The name of EKS.
+    Type: String
+    Default: pmi-eks-cluster
+  k8sVer:
+    Description:  The name of EKS.
+    Type: String
+    Default: 1.11
+
+
+Resources:
+  EKSServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "eks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+      RoleName: !Sub '${AWS::StackName}-eks-role'
+
+  ClusterControlPlaneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow specific access to EKS
+      VpcId: !Ref baseVpc
+
+  EKSCluster:
+    Type: "AWS::EKS::Cluster"
+    Properties:
+      Name: !Ref eksClusterName
+      Version:  !Ref k8sVer
+      RoleArn: !GetAtt EKSServiceRole.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          -
+            !Ref ClusterControlPlaneSecurityGroup
+        SubnetIds:  !Ref subnets
+
+Outputs:
+  eksClusterName:
+    Description: The cluster name of EKS.
+    Value:  !Ref eksClusterName
+  eksARN:
+    Description: The ARN of EKS cluster.
+    Value:  !GetAtt EKSCluster.Arn
+  eksEndpoint:
+    Description: The endpoint of EKS cluster.
+    Value:  !GetAtt EKSCluster.Endpoint
+  # eksCertificateAuthorityData:
+  #   Description: The CertificateAuthorityData of EKS cluster.
+  #   Value:  !GetAtt EKSCluster.CertificateAuthorityData
+  clusterControlPlaneSecurityGroup:
+    Description: The security group of control panel.
+    Value:  !GetAtt ClusterControlPlaneSecurityGroup.GroupId

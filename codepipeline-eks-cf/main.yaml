@@ -1,0 +1,198 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  The CloudFormation template is designed for CI/CD + EKS example.
+
+Parameters:
+  s3cf:
+    Description:  S3 bucket name for storage cloudformation templates.
+    Type: String
+    Default: "cloudformation-box/eks-cf"
+  cidr4VpcDev:
+    Type: String
+    Default:  "10.1.0.0/16"
+  cidr4VpcTest:
+    Type: String
+    Default:  "10.3.0.0/16"
+  cidr4VpcProd:
+    Type: String
+    Default:  "10.7.0.0/16"
+  cidr4SubnetDev:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.1.10.0/24, 10.1.30.0/24, 10.1.50.0/24, 10.1.20.0/24, 10.1.40.0/24, 10.1.60.0/24"
+  cidr4SubnetTest:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.3.10.0/24, 10.3.30.0/24, 10.3.50.0/24, 10.3.20.0/24, 10.3.40.0/24, 10.3.60.0/24"
+  cidr4SubnetProd:
+    Description: "Comma-delimited list of CIDR blocks"
+    Type: String
+    Default: "10.7.10.0/24, 10.7.30.0/24, 10.7.50.0/24, 10.7.20.0/24, 10.7.40.0/24, 10.7.60.0/24"
+  keyPairName:
+    Description:  Key pair name for ec2.
+    Type: String
+    Default: "demo-4-all"
+  s3Dns:
+    Description:  The domain name of S3.
+    Type: String
+    Default: "s3.amazonaws.com"
+  eksClusterName:
+    Description:  The name of EKS.
+    Type: String
+    Default: pmi-eks-cluster
+  k8sVer:
+    Description:  The name of EKS.
+    Type: String
+    Default: 1.11
+  envType:
+      Description: Environment type.
+      Default: dev
+      Type: String
+      AllowedValues: [prod, test, dev]
+      ConstraintDescription: must specify prod, test or dev.
+
+Conditions:
+  CreateProdResources: !Equals [!Ref envType, "prod"]
+  CreateTestResources: !Equals [!Ref envType, "test"]
+  CreateDevResources: !Equals [!Ref envType, "dev"]
+
+Mappings:
+  RegionAMIMap:
+    eu-north-1:
+      AmazonLinux:   ami-082e6cf1c07e60241
+    eu-west-1:
+      AmazonLinux:   ami-0a9006fb385703b54
+    ap-northeast-2:
+      AmazonLinux:   ami-00e5dfebf31377f15
+    ap-northeast-1:
+      AmazonLinux:   ami-063650732b3e8b38c
+    ap-southeast-1:
+      AmazonLinux:   ami-0549ac6995b998478
+    ap-southeast-2:
+      AmazonLinux:   ami-03297c04f71690a76
+    eu-central-1:
+      AmazonLinux:   ami-0ce0ec06e682ee10e
+    us-east-1:
+      AmazonLinux:   ami-0b4eb1d8782fc3aea
+    us-east-2:
+      AmazonLinux:   ami-053cbe66e0033ebcf
+    us-west-2:
+      AmazonLinux:   ami-094fa4044a2a3cf52
+
+
+
+Resources:
+  Network4Dev:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        vpcCidr: !If [CreateProdResources, !Ref cidr4VpcProd, !If [CreateTestResources, !Ref cidr4VpcTest, !Ref cidr4VpcDev]]
+        subnetCidr: !If [CreateProdResources, !Ref cidr4SubnetProd, !If [CreateTestResources, !Ref cidr4SubnetTest, !Ref cidr4SubnetDev]]
+        envType:  !Ref envType
+      Tags:
+        - Key: Name
+          Value: Network4Dev
+      TemplateURL:  !Sub
+          - https://${s3Dns}/${s3Name}/network.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  EKSCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        subnets:
+          !Join
+            - ', '
+            - - !GetAtt Network4Dev.Outputs.publicSubnet1a
+              - !GetAtt Network4Dev.Outputs.publicSubnet1b
+              - !GetAtt Network4Dev.Outputs.publicSubnet1c
+        eksClusterName:  !Ref eksClusterName
+        k8sVer: !Ref k8sVer
+      Tags:
+        - Key: Name
+          Value: EKSCluster
+      TemplateURL:  !Sub
+          - https://${s3Dns}/${s3Name}/eks/eks-cluster.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  EKSNodes:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: EKSCluster
+    Properties:
+      Parameters:
+        keyPairName: !Ref keyPairName
+        nodeImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+        eksClusterName:  !Ref eksClusterName
+        clusterControlPlaneSecurityGroup: !GetAtt EKSCluster.Outputs.clusterControlPlaneSecurityGroup
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        subnets:
+          !Join
+            - ', '
+            - - !GetAtt Network4Dev.Outputs.privateSubnet1a
+              - !GetAtt Network4Dev.Outputs.privateSubnet1b
+              - !GetAtt Network4Dev.Outputs.privateSubnet1c
+      Tags:
+        - Key: Name
+          Value: EKSNodes
+      TemplateURL:  !Sub
+          - https://${s3Dns}/${s3Name}/eks/eks-nodes.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+  BastionServer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        keyPairName:  !Ref keyPairName
+        bastionImageId: !FindInMap [ RegionAMIMap, !Ref "AWS::Region", AmazonLinux ]
+        baseVpc: !GetAtt Network4Dev.Outputs.vpcStack
+        s3cf: !Ref s3cf
+        publicSubnet1a: !GetAtt Network4Dev.Outputs.publicSubnet1a
+      Tags:
+        - Key: Name
+          Value: BastionServer
+      TemplateURL:  !Sub
+          - https://${s3Dns}/${s3Name}/bastion.yaml
+          - { s3Name: !Ref s3cf }
+      TimeoutInMinutes: "60"
+
+Outputs:
+  devVpcStack:
+    Description: VPC Stack ID.
+    Value:  !GetAtt Network4Dev.Outputs.vpcStack
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-baseVpc'
+  devPublicSubnet1a:
+    Description: Public subnet 1a.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1a
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1aSubnet'
+  devPublicSubnet1b:
+    Description: Public subnet 1b.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1b
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1bSubnet'
+  devPublicSubnet1c:
+    Description: Public subnet 1c.
+    Value:  !GetAtt Network4Dev.Outputs.publicSubnet1c
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pub1cSubnet'
+
+  devPrivateSubnet1a:
+    Description: Private subnet 1a.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1a
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1aSubnet'
+  devPrivateSubnet1b:
+    Description: Private subnet 1b.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1b
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1bSubnet'
+  devPrivateSubnet1c:
+    Description: Private subnet 1c.
+    Value:  !GetAtt Network4Dev.Outputs.privateSubnet1c
+    Export:
+      Name: !Sub '${AWS::StackName}-dev-pri1cSubnet'
