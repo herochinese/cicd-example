@@ -39,6 +39,7 @@ func main() {
 		log.Printf("City wasn't setting and loading city list from <%s>", "ChinaCityList.json")
 		cs := loadCityList("ChinaCityList.json")
 		//cs := []string{"beijing"}
+
 		var wg sync.WaitGroup
 		wg.Add(len(cs))
 		for x := range cs {
@@ -48,7 +49,12 @@ func main() {
 		wg.Wait()
 
 	} else {
-		util.PrintJson("Air Quality of " + strings.ToUpper(*city) + ": ", feed.CityFeed(*city))
+		b,err := json.Marshal(getAir(*city))
+		if err!=nil {
+			log.Println(err)
+			return
+		}
+		util.PrintJson("Air Quality of " + strings.ToUpper(*city) + ": ", b)
 	}
 
 
@@ -110,6 +116,7 @@ func schedule(what []save, city string, delay time.Duration) {
 		air := getAir(city)
 		if &air.IndexCityVHash!=nil && len(air.IndexCityVHash)>0 {
 			for _,w := range what {
+
 				w(air)
 			}
 		}

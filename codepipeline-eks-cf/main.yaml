@@ -108,6 +108,9 @@ Resources:
             - - !GetAtt Network4Dev.Outputs.publicSubnet1a
               - !GetAtt Network4Dev.Outputs.publicSubnet1b
               - !GetAtt Network4Dev.Outputs.publicSubnet1c
+              - !GetAtt Network4Dev.Outputs.privateSubnet1a
+              - !GetAtt Network4Dev.Outputs.privateSubnet1b
+              - !GetAtt Network4Dev.Outputs.privateSubnet1c
         eksClusterName:  !Ref eksClusterName
         k8sVer: !Ref k8sVer
       Tags:

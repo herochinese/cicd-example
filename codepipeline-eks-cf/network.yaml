@@ -79,6 +79,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-pri1a-subnet'
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
       VpcId:
         !Ref BaseVPC
   Pri1bSubnet:
@@ -93,6 +95,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-pri1b-subnet'
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
       VpcId:  !Ref BaseVPC
   Pri1cSubnet:
     Type: AWS::EC2::Subnet
@@ -106,6 +110,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-pri1c-subnet'
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
       VpcId:  !Ref BaseVPC
 
   VpcInternetGateway:

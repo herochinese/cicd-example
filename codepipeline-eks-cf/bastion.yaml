@@ -66,12 +66,20 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
       Policies:
         -
           PolicyName: !Sub '${AWS::StackName}-bostion-policy'
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "eks:DescribeCluster"
+                Resource: "*"
               -
                 Effect: "Allow"
                 Action:
@@ -86,11 +94,6 @@ Resources:
                 Effect: "Allow"
                 Action:
                   - "cloudwatch:*"
-                Resource: "*"
-              -
-                Effect: "Allow"
-                Action:
-                  - "xray:*"
                 Resource: "*"
               -
                 Effect: "Allow"
