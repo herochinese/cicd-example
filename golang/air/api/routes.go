@@ -20,6 +20,7 @@ var LocalCache map[string]feed.AirQuality
 func NewRouter() *mux.Router {
 
 	LocalCache = make(map[string]feed.AirQuality)
+	ProcessMessage()
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {

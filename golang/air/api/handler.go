@@ -1,12 +1,12 @@
 package api
 
 import (
+	"../feed"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"../feed"
 )
 
 
@@ -29,6 +29,9 @@ func City(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
+var WorkQueue = make(chan feed.AirQuality, 200)
+
 func Feed(w http.ResponseWriter, r *http.Request) {
 	var air feed.AirQuality
 	err := json.NewDecoder(r.Body).Decode(&air)
@@ -38,7 +41,23 @@ func Feed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LocalCache[air.City]=air
+	//LocalCache[air.City]=air
+	WorkQueue <- air
 	fmt.Fprintf(w, `{"status":"success", "description":"Air Quality data of %s has been cached."}`, air.City)
 
+}
+
+func ProcessMessage() {
+	go func() {
+		for {
+			select {
+				case work := <-WorkQueue:
+					LocalCache[work.City]=work
+				//case <-w.QuitChan:
+				//	// We have been asked to stop.
+				//	fmt.Printf("worker%d stopping\n", w.ID)
+				//	return
+			}
+		}
+	}()
 }

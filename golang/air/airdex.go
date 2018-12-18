@@ -8,10 +8,12 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
 )
+
 
 type save func(air feed.AirQuality)
 
@@ -31,6 +33,10 @@ type County struct {
 	NameCN string `json:"name"`
 }
 
+/**
+1. Setup environment - AIRDEX_API_URL as the base url of API server.
+2. Running API server before AIRDEX
+ */
 func main() {
 	city := flag.String("city","beijing", "name of the city")
 	flag.Parse()
@@ -112,11 +118,18 @@ func getAir(city string) feed.AirQuality {
 
 func schedule(what []save, city string, delay time.Duration) {
 	tick := time.Tick(delay)
+	airdexapi :=os.Getenv("AIRDEX_API_URL")
 	for range tick {
 		air := getAir(city)
 		if &air.IndexCityVHash!=nil && len(air.IndexCityVHash)>0 {
 			for _,w := range what {
+				b, err :=json.Marshal(air)
+				if err!=nil {
+					log.Println(err)
+				} else {
 
+					feed.ApiPost(airdexapi, "application/json", b)
+				}
 				w(air)
 			}
 		}
