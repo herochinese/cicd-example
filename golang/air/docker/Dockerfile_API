@@ -9,7 +9,7 @@ RUN apk update && apk add git
 
 COPY . $GOPATH/src/mypackage/myapp/
 RUN sed -i -e "s/-1.0.0/$ver/g" $GOPATH/src/mypackage/myapp/airdex.go
-RUN rm $GOPATH/src/mypackage/myapp/airdex_api.go
+RUN rm $GOPATH/src/mypackage/myapp/airdex.go
 WORKDIR $GOPATH/src/mypackage/myapp/
 
 
@@ -18,14 +18,13 @@ WORKDIR $GOPATH/src/mypackage/myapp/
 RUN go get -d -v
 
 #build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/airdex
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/airdex_api
 
 # STEP 2 build a small image
 # start from scratch
 FROM scratch
 
 # Copy our static executable
-COPY --from=builder /go/bin/airdex /go/bin/airdex
-COPY ./ChinaCityList.json /ChinaCityList.json
-#EXPOSE 8080
-CMD ["/go/bin/airdex"]
+COPY --from=builder /go/bin/airdex_api /go/bin/airdex_api
+EXPOSE 8080
+CMD ["/go/bin/airdex_api"]
