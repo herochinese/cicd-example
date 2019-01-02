@@ -5,7 +5,6 @@ import (
 	"air/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -189,7 +188,7 @@ func TransactSave2DynamoPerf(air feed.AirQuality) {
 func initSession() *dynamodb.DynamoDB {
 	conf := aws.Config{
 		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewSharedCredentials("/Users/chuancc/.aws/credentials", "default"),
+		//Credentials: credentials.NewSharedCredentials("~/.aws/credentials", "default"),
 	}
 	svc := dynamodb.New(session.New(&conf))
 	log.Println("DynamoDB API : ", svc.APIVersion)
