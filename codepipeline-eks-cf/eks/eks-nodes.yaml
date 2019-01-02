@@ -123,6 +123,18 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
         - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Policies:
+        -
+          PolicyName: !Sub '${AWS::StackName}-node-policy'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "ssm:*"
+                Resource: "*"
+      RoleName: !Sub '${AWS::StackName}-node-role'
 
   NodeSecurityGroup:
     Type: AWS::EC2::SecurityGroup
