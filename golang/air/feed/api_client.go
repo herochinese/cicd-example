@@ -3,6 +3,7 @@ package feed
 import (
 	"air/util"
 	"bytes"
+	"crypto/tls"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,25 +17,25 @@ var host = "https://api.waqi.info"
 func Search(keyword string)  []byte {
 	//https://api.waqi.info/search/?token=demo&keyword=bangalore
 	url := host + "/feed/here/?token=" + token + "&keyword="+keyword
-	return ApiGet(url)
+	return ApiGet2(url)
 }
 func IPFeed() []byte {
 	//https://api.waqi.info/feed/here/?token=demo
 	url := host + "/feed/here/?token=" + token
-	return ApiGet(url)
+	return ApiGet2(url)
 
 }
 
 func GeoFeed(lat string, lng string) []byte {
 	//https://api.waqi.info/feed/geo:10.3;20.7/?token=demo
 	url := host + "/feed/geo:" + lat + ";" + lng + "/?token=" + token
-	return ApiGet(url)
+	return ApiGet2(url)
 }
 
 func CityFeed(city string) []byte {
 	//https://api.waqi.info/fee/beijing/?token=demo
 	url := host + "/feed/" + city + "/?token=" + token
-	return ApiGet(url)
+	return ApiGet2(url)
 }
 
 func ApiGet(url string) []byte {
@@ -46,6 +47,27 @@ func ApiGet(url string) []byte {
 		return nil
 	}
 	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Read buffer failed.\n")
+	}
+	util.PrintJson("Response -> ", body)
+	return body
+}
+
+
+func ApiGet2(url string) []byte {
+	config := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	tr := &http.Transport{TLSClientConfig: config}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	resp, err := client.Do(req)
+	if err !=nil {
+		log.Printf("API call was failed from %s with Err: %s. \n", url, err)
+		return nil
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Read buffer failed.\n")
