@@ -25,5 +25,6 @@ FROM scratch
 
 # Copy our static executable
 COPY --from=builder /go/bin/airdex /go/bin/airdex
+COPY ./ChinaCityList.json /ChinaCityList.json
 #EXPOSE 8080
 CMD ["/go/bin/airdex"]
