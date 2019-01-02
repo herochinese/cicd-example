@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"net/http"
-	"../feed"
+	"air/feed"
 )
 
 type Route struct {

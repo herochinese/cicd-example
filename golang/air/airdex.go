@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./data"
-	"./feed"
-	"./util"
+	"air/data"
+	"air/feed"
+	"air/util"
 	"encoding/json"
 	"flag"
 	"io/ioutil"

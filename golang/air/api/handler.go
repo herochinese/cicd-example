@@ -1,7 +1,7 @@
 package api
 
 import (
-	"../feed"
+	"air/feed"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"

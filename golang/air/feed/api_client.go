@@ -1,7 +1,7 @@
 package feed
 
 import (
-	"../util"
+	"air/util"
 	"bytes"
 	"io/ioutil"
 	"log"
