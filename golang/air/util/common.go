@@ -2,10 +2,12 @@ package util
 
 import (
 	"bytes"
+	"crypto/x509"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"io/ioutil"
 	"log"
 	"time"
 )
@@ -48,6 +50,26 @@ func PutMetric2CW(metric *cloudwatch.PutMetricDataInput) {
 	}
 
 }
+
+
+//Load certificate at runtime.
+func loadCert(localCertFile string) *x509.CertPool {
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	certs, err := ioutil.ReadFile(localCertFile)
+	if err != nil {
+		log.Fatalf("Failed to append %q to RootCAs: %v", localCertFile, err)
+	}
+
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		log.Println("No certs appended, using system certs only")
+	}
+	return rootCAs
+}
+
+
 //AWS_CA_BUNDLE=$HOME/my_custom_ca_bundle
 /*
 &cloudwatch.PutMetricDataInput{

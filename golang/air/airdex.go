@@ -128,7 +128,9 @@ func schedule(what []save, city string, delay time.Duration) {
 					log.Println(err)
 				} else {
 
-					feed.ApiPost(airdexapi, "application/json", b)
+					if len(airdexapi) >0 {
+						feed.ApiPost(airdexapi, "application/json", b)
+					}
 				}
 				w(air)
 			}
