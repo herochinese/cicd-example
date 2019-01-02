@@ -188,6 +188,7 @@ func TransactSave2DynamoPerf(air feed.AirQuality) {
 func initSession() *dynamodb.DynamoDB {
 	conf := aws.Config{
 		Region:      aws.String("us-east-1"),
+		DisableSSL: 	aws.Bool(true),
 		//Credentials: credentials.NewSharedCredentials("~/.aws/credentials", "default"),
 	}
 	svc := dynamodb.New(session.New(&conf))

@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"log"
@@ -28,7 +29,14 @@ func PrintJson(title string, body []byte) {
 }
 
 func PutMetric2CW(metric *cloudwatch.PutMetricDataInput) {
+
+	conf := aws.Config{
+		Region:      aws.String("us-east-1"),
+		DisableSSL: 	aws.Bool(true),
+		//Credentials: credentials.NewSharedCredentials("~/.aws/credentials", "default"),
+	}
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		Config: conf,
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
@@ -40,6 +48,7 @@ func PutMetric2CW(metric *cloudwatch.PutMetricDataInput) {
 	}
 
 }
+//AWS_CA_BUNDLE=$HOME/my_custom_ca_bundle
 /*
 &cloudwatch.PutMetricDataInput{
 		Namespace: aws.String("DynamoDBFoo/Traffic"),
