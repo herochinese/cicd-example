@@ -17,5 +17,5 @@ spec:
       spec:
         containers:
           - name: airdex-container
-            image: k8s/airdex
+            image: 530820415924.dkr.ecr.us-east-1.amazonaws.com/airdex-repo:latest
 
