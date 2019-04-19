@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: airdex_api-service
+  name: airdex-api-service
   labels:
-    run: airdex_api-service
+    run: airdex-api-service
 spec:
   selector:
-    app: airdex_api
+    app: airdex-api
     tier: front
   ports:
     - protocol: TCP

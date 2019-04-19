@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: airdex-depployment
@@ -14,8 +14,11 @@ spec:
       labels:
         app: airdex
         tier: backend
-      spec:
-        containers:
-          - name: airdex-container
-            image: 530820415924.dkr.ecr.us-east-1.amazonaws.com/airdex-repo:latest
+    spec:
+      containers:
+        - name: airdex-container
+          image: 530820415924.dkr.ecr.us-east-1.amazonaws.com/airdex-repo:latest
+          env:
+            - name: AIRDEX_API_URL
+              value: http://airdex-api:8080/feed
 

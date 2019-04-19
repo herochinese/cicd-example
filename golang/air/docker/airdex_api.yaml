@@ -1,23 +1,23 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: airdex_api-depployment
+  name: airdex-api-depployment
 
 spec:
   selector:
     matchLabels:
-      app: airdex_api
+      app: airdex-api
       tier: front
   replicas: 1
   template:
     metadata:
       labels:
-        app: airdex_api
+        app: airdex-api
         tier: front
-      spec:
-        containers:
-          - name: airdex_api-container
-            image: k8s/airdex_api
-            ports:
-              - name: http
-                containerPort: 8080
+    spec:
+      containers:
+        - name: airdex-api-container
+          image: 530820415924.dkr.ecr.us-east-1.amazonaws.com/airdex_api-repo:latestd
+          ports:
+            - name: http
+              containerPort: 8080
