@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airdex-service
+  labels:
+    run: airdex-service
+spec:
+  selector:
+    app: airdex
+    tier: backend

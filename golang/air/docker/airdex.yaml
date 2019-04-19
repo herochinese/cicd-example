@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: airdex-depployment
+
+spec:
+  selector:
+    matchLabels:
+      app: airdex
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: airdex
+        tier: backend
+      spec:
+        containers:
+          - name: airdex-container
+            image: k8s/airdex
+
