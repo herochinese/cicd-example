@@ -49,7 +49,13 @@ https://www.gocd.org/
 
 
 ### Spinnaker
+Spinnaker is an open-source, multi-cloud continuous delivery platform that helps you release software changes with high velocity and confidence.
 
+![](./docs/spinnaker.png)
+
+![](./docs/deployment-strategies.png)
+
+https://www.spinnaker.io/
 
 
 ### Jenkins  
