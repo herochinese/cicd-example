@@ -7,23 +7,19 @@ This project is designed for practicing various of CI/CD processes on top of AWS
 # CI/CD Examples  
 
 ## GoCD with ECS
-```
+
 Checkout scheduled jobs from GoCD API call and provision GoCD agent accordingly. Each job will be assigned to a container, once job is done and then close container as needed.
 
-```
+
 [MORE ...](./gocd_4_ecs)
 
 
 ## GoCD with EKS
-```
 
-```
 [MORE ...](./codepipeline_4_eks)
 
 ## Spinnaker with EKS
-```
 
-```
 [MORE ...](./spinnaker_4_eks)
 
 # Tools
