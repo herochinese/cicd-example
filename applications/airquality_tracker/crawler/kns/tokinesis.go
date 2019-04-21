@@ -6,22 +6,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"log"
-	"os"
 )
-
-
 
 var svc *kinesis.Kinesis
 
+func initKinesis(region string) *kinesis.Kinesis {
 
-func initKinesis() *kinesis.Kinesis {
-	region := os.Getenv("AWS_REGION")
 	conf := aws.Config{
-		Region:      aws.String(region),
-		DisableSSL: 	aws.Bool(true),
+		Region:     aws.String(region),
+		DisableSSL: aws.Bool(true),
 	}
 
-	se, err := session.NewSession( &conf)
+	se, err := session.NewSession(&conf)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -31,15 +27,13 @@ func initKinesis() *kinesis.Kinesis {
 
 }
 
-func Push2Kinesis(stream string, json string) {
-
+func Push2Kinesis(region string, stream string, b []byte) {
 
 	if svc != nil {
 		record := kinesis.PutRecordInput{
-			Data: []byte(json),
-			StreamName: aws.String(stream),
-			PartitionKey: aws.String(getHash(json)),
-
+			Data:         b,
+			StreamName:   aws.String(stream),
+			PartitionKey: aws.String(getHash(string(b))),
 		}
 		output, err := svc.PutRecord(&record)
 		if err != nil {
@@ -48,7 +42,7 @@ func Push2Kinesis(stream string, json string) {
 		log.Printf("%v\n", output)
 
 	} else {
-		svc = initKinesis()
+		svc = initKinesis(region)
 	}
 
 }
@@ -57,5 +51,5 @@ func getHash(s string) string {
 	h := sha1.New()
 	h.Write([]byte(s))
 
-	return  string(h.Sum(nil))
+	return string(h.Sum(nil))
 }
