@@ -14,7 +14,8 @@ func initKinesis(region string) *kinesis.Kinesis {
 
 	conf := aws.Config{
 		Region:     aws.String(region),
-		DisableSSL: aws.Bool(true),
+		//DisableSSL: aws.Bool(true),
+		//Credentials: credentials.NewSharedCredentials("~/.aws/credentials", "default"),
 	}
 
 	se, err := session.NewSession(&conf)
@@ -29,21 +30,30 @@ func initKinesis(region string) *kinesis.Kinesis {
 
 func Push2Kinesis(region string, stream string, b []byte) {
 
-	if svc != nil {
-		record := kinesis.PutRecordInput{
-			Data:         b,
-			StreamName:   aws.String(stream),
-			PartitionKey: aws.String(getHash(string(b))),
-		}
-		output, err := svc.PutRecord(&record)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Printf("%v\n", output)
-
-	} else {
+	if svc == nil {
 		svc = initKinesis(region)
 	}
+
+	streamInput := kinesis.DescribeStreamInput{
+		StreamName: aws.String(stream),
+	}
+	so, err :=svc.DescribeStream(&streamInput)
+	if err!=nil {
+		log.Println(err)
+	}
+	log.Println(so)
+
+	record := kinesis.PutRecordInput{
+		Data:         b,
+		StreamName:   aws.String(stream),
+		PartitionKey: aws.String(getHash(string(b))),
+	}
+	ro, err := svc.PutRecord(&record)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("%v\n", ro)
+
 
 }
 

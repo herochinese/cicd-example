@@ -28,11 +28,6 @@ func main() {
 		log.Fatal("Check out environments: MY_AWS_REGION & MY_AWS_KINESIS_NAME")
 	}
 
-	//for _, c := range cities {
-	//
-	//	log.Println("City -> ", c)
-	//	pullAirData(c)
-	//}
 
 }
 
@@ -74,8 +69,10 @@ func schedule(cities []string, delay time.Duration) {
 			data := pullAirData(c)
 			b, err := json.Marshal(data)
 			if err != nil {
-				kns.Push2Kinesis(region, stream, b)
+				log.Println(err)
+				continue
 			}
+			kns.Push2Kinesis(region, stream, b)
 
 		}
 

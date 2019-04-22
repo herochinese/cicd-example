@@ -10,7 +10,7 @@ func LoadCities(file string) []string {
 	var pr []Province
 	body, err := ioutil.ReadFile(file)
 	if err!=nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil
 	}
 
