@@ -14,8 +14,8 @@ env:
 before_install:
  - cd applications/airquality_tracker/crawler
 
-before_script:
- - cd applications/airquality_tracker/crawler
+#before_script:
+# - cd applications/airquality_tracker/crawler
 
 script:
  - go test -v ./...
