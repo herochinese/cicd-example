@@ -1,0 +1,11 @@
+language: go
+
+go:
+- 1.11.x
+- 1.12.x
+- feature_air-quality-tracker 
+
+script:
+- cd applications/airquality_tracker/crawler
+- go test -v ./...
+- CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
