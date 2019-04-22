@@ -1,20 +1,22 @@
 language: go
 
 go:
-- 1.11.x
-- 1.12.x
+ - 1.11.x
+ - 1.12.x
 
 branches:
  only:
   - feature_air-quality-tracker
 
+env:
+ - GO111MODULE=on
 
 before_install:
-- cd applications/airquality_tracker/crawler
+ - cd applications/airquality_tracker/crawler
 
 before_script:
-- cd applications/airquality_tracker/crawler
+ - cd applications/airquality_tracker/crawler
 
 script:
-- go test -v ./...
-- CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
+ - go test -v ./...
+ - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
