@@ -1,5 +1,8 @@
 language: go
 
+services:
+  - docker
+
 go:
  - 1.11.x
  - 1.12.x
@@ -10,13 +13,40 @@ branches:
 
 env:
  - GO111MODULE=on
+ # - AWS_ECR_ACCOUNT=
+ # - AWS_REGION=
 
-before_install:
- - cd applications/airquality_tracker/crawler
+matrix:
+  include:
+    - name: "crawler"
 
-#before_script:
-# - cd applications/airquality_tracker/crawler
+      before_install:
+       - cd applications/airquality_tracker/crawler
 
-script:
- - go test -v ./...
- - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
+      #before_script:
+      # - cd applications/airquality_tracker/crawler
+
+      script:
+       - go test -v ./...
+       - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
+
+    - name: "quality"
+
+      before_install:
+       - cd ../quality
+
+      #before_script:
+      # - cd applications/airquality_tracker/crawler
+
+      script:
+       - go test -v ./...
+       - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o quality
+
+      # after_success:
+      #   - docker --version
+      #   - pip install --user awscli
+      #   - export PATH=$PATH:$HOME/.local/bin # put aws in the path
+      #   - eval $(aws ecr get-login --region us-west-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+      #   - docker build -t crawler .
+      #   - docker tag crawler:$TRAVIS_BUILD_ID $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
+      #   - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID

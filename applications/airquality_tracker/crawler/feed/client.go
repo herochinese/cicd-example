@@ -9,7 +9,6 @@ import (
 	"net/http"
 )
 
-
 var token = "b0e78ca32d058a9170b6907c5214c0e946534cc9"
 var host = "https://api.waqi.info"
 
@@ -18,49 +17,48 @@ type HttpAccessLayer interface {
 	Post(url string, contentType string, body []byte) ([]byte, error)
 }
 
-type HttpHAL struct{
+type HttpHAL struct {
 	transport *http.Transport
-	client *http.Client
+	client    *http.Client
 }
 
-func NewHttpHAL() (*HttpHAL, error){
+func NewHttpHAL() (*HttpHAL, error) {
 	config := &tls.Config{
 		InsecureSkipVerify: true,
 	}
 	transport := &http.Transport{TLSClientConfig: config}
 	client := &http.Client{Transport: transport}
 
-	hal := &HttpHAL {
+	hal := &HttpHAL{
 		transport: transport,
-		client: client,
+		client:    client,
 	}
 	return hal, nil
 }
 
 func (h *HttpHAL) Get(url string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err!=nil {
+	if err != nil {
 		log.Printf("http.NewRequest was failed due to [%s].\n", err)
 		return nil, err
 	}
 
 	resp, err := h.client.Do(req)
-	if err!=nil {
+	if err != nil {
 		log.Printf("http.Call was failed due to [%s].\n", err)
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	if err!=nil {
+	if err != nil {
 		log.Printf("ioutil.ReadAll was failed due to [%s].\n", err)
 		return nil, err
 	}
 	return body, nil
 }
 
-
-func  (h *HttpHAL) Post(url string, contentType string, b []byte) ([]byte, error) {
+func (h *HttpHAL) Post(url string, contentType string, b []byte) ([]byte, error) {
 	resp, err1 := http.Post(url, contentType, bytes.NewReader(b))
-	if err1!=nil {
+	if err1 != nil {
 		log.Printf("API call was failed from %s with Err: %s. \n", url, err1)
 		return nil, err1
 	}
@@ -74,11 +72,9 @@ func  (h *HttpHAL) Post(url string, contentType string, b []byte) ([]byte, error
 	return b, nil
 }
 
-
-
-func Search(keyword string)  []byte {
+func Search(keyword string) []byte {
 	//https://api.waqi.info/search/?token=demo&keyword=bangalore
-	url := host + "/feed/here/?token=" + token + "&keyword="+keyword
+	url := host + "/feed/here/?token=" + token + "&keyword=" + keyword
 	return ApiGet(url)
 }
 func IPFeed() []byte {
@@ -100,13 +96,10 @@ func CityFeed(city string) []byte {
 	return ApiGet(url)
 }
 
-
-
-
 func ApiGet(url string) []byte {
-	h, err :=NewHttpHAL()
+	h, err := NewHttpHAL()
 	b, err := h.Get(url)
-	if err!=nil {
+	if err != nil {
 		log.Printf("HttpAccessLayer.Get was failed due to [%s].\n", err)
 		return nil
 	}
@@ -114,8 +107,6 @@ func ApiGet(url string) []byte {
 	toJson("Resp -> ", b)
 	return b
 }
-
-
 
 func toJson(title string, body []byte) {
 	var prettyJSON bytes.Buffer

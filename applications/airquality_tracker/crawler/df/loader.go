@@ -9,13 +9,13 @@ import (
 func LoadCities(file string) []string {
 	var pr []Province
 	body, err := ioutil.ReadFile(file)
-	if err!=nil {
+	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
 	err2 := json.Unmarshal(body, &pr)
-	if err2!=nil {
+	if err2 != nil {
 		log.Println(err)
 	}
 	cs := make([]string, len(pr))
@@ -25,4 +25,3 @@ func LoadCities(file string) []string {
 	}
 	return cs
 }
-

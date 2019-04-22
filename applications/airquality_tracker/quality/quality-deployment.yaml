@@ -1,0 +1,25 @@
+
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: quality-depployment
+  namespace: air-quality-tracker
+
+spec:
+  selector:
+    matchLabels:
+      app: quality
+      tier: front
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: quality
+        tier: front
+      spec:
+        containers:
+          - name: quality-container
+            image: k8s/quality
+            ports:
+              - name: http
+                containerPort: 8080

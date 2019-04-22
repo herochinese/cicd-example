@@ -14,11 +14,11 @@ type Route struct {
 
 type Routes []Route
 
-var LocalCache map[string] AirQuality
+var LocalCache map[string]AirQuality
 
 func NewRouter() *mux.Router {
 
-	LocalCache = make(map[string] AirQuality)
+	LocalCache = make(map[string]AirQuality)
 	ProcessMessage()
 
 	router := mux.NewRouter().StrictSlash(true)

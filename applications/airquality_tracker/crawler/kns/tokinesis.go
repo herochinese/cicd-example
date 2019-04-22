@@ -13,7 +13,7 @@ var svc *kinesis.Kinesis
 func initKinesis(region string) *kinesis.Kinesis {
 
 	conf := aws.Config{
-		Region:     aws.String(region),
+		Region: aws.String(region),
 		//DisableSSL: aws.Bool(true),
 		//Credentials: credentials.NewSharedCredentials("~/.aws/credentials", "default"),
 	}
@@ -37,8 +37,8 @@ func Push2Kinesis(region string, stream string, b []byte) {
 	streamInput := kinesis.DescribeStreamInput{
 		StreamName: aws.String(stream),
 	}
-	so, err :=svc.DescribeStream(&streamInput)
-	if err!=nil {
+	so, err := svc.DescribeStream(&streamInput)
+	if err != nil {
 		log.Println(err)
 	}
 	log.Println(so)
@@ -53,7 +53,6 @@ func Push2Kinesis(region string, stream string, b []byte) {
 		log.Println(err)
 	}
 	log.Printf("%v\n", ro)
-
 
 }
 

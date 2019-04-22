@@ -28,7 +28,6 @@ func main() {
 		log.Fatal("Check out environments: MY_AWS_REGION & MY_AWS_KINESIS_NAME")
 	}
 
-
 }
 
 func pullAirData(city string) feed.AirQuality {

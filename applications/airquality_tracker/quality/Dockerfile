@@ -8,7 +8,7 @@ ARG ver=0.0.0
 RUN apk update && apk add git
 
 COPY . $GOPATH/src/mypackage/myapp/
-RUN sed -i -e "s/-1.0.0/$ver/g" $GOPATH/src/mypackage/myapp/crawler.go
+RUN sed -i -e "s/-1.0.0/$ver/g" $GOPATH/src/mypackage/myapp/quality.go
 WORKDIR $GOPATH/src/mypackage/myapp/
 
 
@@ -17,14 +17,13 @@ WORKDIR $GOPATH/src/mypackage/myapp/
 RUN go get -d -v
 
 #build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/crawler
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/quality
 
 # STEP 2 build a small image
 # start from scratch
 FROM scratch
 
 # Copy our static executable
-COPY --from=builder /go/bin/crawler /go/bin/crawler
-COPY ./china-cities.json /china-cities.json
-#EXPOSE 8080
-CMD ["/go/bin/crawler"]
+COPY --from=builder /go/bin/quality /go/bin/quality
+EXPOSE 8080
+CMD ["/go/bin/quality"]

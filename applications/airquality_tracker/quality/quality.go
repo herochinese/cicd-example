@@ -15,7 +15,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(bind, router))
 }
 
-
 /*
  ====================
  REQ
