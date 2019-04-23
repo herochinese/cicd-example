@@ -9,7 +9,7 @@ RUN apk update && apk add git
 
 COPY . $GOPATH/src/mypackage/myapp/
 RUN sed -i -e "s/-1.0.0/$ver/g" $GOPATH/src/mypackage/myapp/crawler.go
-WORKDIR $GOPATH/src/mypackage/myapp/
+    WORKDIR $GOPATH/src/mypackage/myapp/
 
 
 #get dependancies
