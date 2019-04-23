@@ -1,9 +1,3 @@
-language: go
-
-go:
- - 1.11.x
- - 1.12.x
-
 services:
   - docker
 
@@ -11,29 +5,44 @@ branches:
  only:
   - feature_air-quality-tracker
 
-env:
- - GO111MODULE=on
+# before_script:
 
-before_script:
- - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/crawler
+matrix:
+  include:
+    - language: go
+      go:
+        - 1.11.x
+      env:
+        - GO111MODULE=on
+      script:
+        - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/crawler
+        - go test -v ./...
+        - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
+      after_success:
+        - docker --version
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin # put aws in the path
+        - eval $(aws ecr get-login --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+        - docker build -t crawler .
+        - docker tag crawler:$TRAVIS_BUILD_ID $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
+        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
 
-script:
- - go test -v ./...
- - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o crawler
+    - language: go
+      go:
+        - 1.11.x
+      env:
+        - GO111MODULE=on
+      script:
+        - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
+        - go test -v ./...
+        - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o quality
 
- - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
- - go test -v ./...
- - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o quality
-
- - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/keeper
- - go test -v ./...
- - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o keeper
-
-# after_success:
-#   - docker --version
-#   - pip install --user awscli
-#   - export PATH=$PATH:$HOME/.local/bin # put aws in the path
-#   - eval $(aws ecr get-login --region us-west-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
-#   - docker build -t crawler .
-#   - docker tag crawler:$TRAVIS_BUILD_ID $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
-#   - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
+    - language: go
+      go:
+        - 1.11.x
+      env:
+        - GO111MODULE=on
+      script:
+        - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/keeper
+        - go test -v ./...
+        - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o keeper
