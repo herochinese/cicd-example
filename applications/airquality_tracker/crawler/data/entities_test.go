@@ -1,4 +1,4 @@
-package feed
+package data
 
 import "testing"
 
@@ -15,7 +15,7 @@ func TestSplitName(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		city, citycn :=SplitName(table.str)
+		city, citycn := SplitName(table.str)
 		if city!=table.city {
 			t.Errorf("city expected %s got %s\n", table.city, city)
 		}

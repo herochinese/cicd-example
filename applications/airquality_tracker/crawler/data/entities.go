@@ -1,4 +1,4 @@
-package feed
+package data
 
 import (
 	"crypto/sha1"
@@ -7,6 +7,24 @@ import (
 	"strconv"
 	"strings"
 )
+
+type Province struct {
+	Name   string `json:"name_en"`
+	NameCN string `json:"name"`
+	City   []City `json:"city"`
+}
+
+type City struct {
+	Name   string   `json:"name"`
+	County []County `json:"county"`
+}
+
+type County struct {
+	Name   string `json:"name_en"`
+	Code   string `json:"code"`
+	NameCN string `json:"name"`
+}
+
 
 type ApiError struct {
 	Status string `json:"status"`

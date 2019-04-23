@@ -6,10 +6,11 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"quality/data"
 )
 
 func Cities(w http.ResponseWriter, r *http.Request) {
-	values := []AirQuality{}
+	values := []data.AirQuality{}
 	for _, value := range LocalCache {
 		values = append(values, value)
 	}
@@ -27,10 +28,10 @@ func City(w http.ResponseWriter, r *http.Request) {
 
 }
 
-var WorkQueue = make(chan AirQuality, 200)
+var WorkQueue = make(chan data.AirQuality, 200)
 
 func Feed(w http.ResponseWriter, r *http.Request) {
-	var air AirQuality
+	var air data.AirQuality
 	err := json.NewDecoder(r.Body).Decode(&air)
 	if err != nil {
 		log.Println(err)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crawler/data"
 	"crawler/df"
 	"crawler/feed"
 	"crawler/kns"
@@ -30,10 +31,10 @@ func main() {
 
 }
 
-func pullAirData(city string) feed.AirQuality {
-	var ori feed.OriginAirQuality
-	var apiError feed.ApiError
-	var air feed.AirQuality
+func pullAirData(city string) data.AirQuality {
+	var ori data.OriginAirQuality
+	var apiError data.ApiError
+	var air data.AirQuality
 
 	cf := feed.CityFeed(city)
 	if cf != nil {
@@ -51,7 +52,7 @@ func pullAirData(city string) feed.AirQuality {
 			return air
 
 		}
-		air = feed.Copy2AirQuality(ori)
+		air = data.Copy2AirQuality(ori)
 
 	}
 	return air

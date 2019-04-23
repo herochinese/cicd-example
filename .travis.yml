@@ -24,7 +24,7 @@ matrix:
         - export PATH=$PATH:$HOME/.local/bin # put aws in the path
         - eval $(aws ecr get-login --region $AWS_REGION) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
         - docker build -t crawler .
-        - docker tag crawler:$TRAVIS_BUILD_ID $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
+        - docker tag crawler $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
         - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
 
     - language: go
@@ -46,3 +46,13 @@ matrix:
         - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/keeper
         - go test -v ./...
         - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o keeper
+
+    - language: go
+      go:
+        - 1.11.x
+      env:
+        - GO111MODULE=on
+      script:
+        - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/dsource
+        - go test -v ./...
+        - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dsource

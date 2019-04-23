@@ -1,4 +1,4 @@
-package api
+package data
 
 type AirQuality struct {
 	IndexCityVHash string `json:"index_city_v_hash"`
