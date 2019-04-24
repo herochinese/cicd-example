@@ -8,10 +8,9 @@ metadata:
 spec:
   selector:
     app: quality
-    tier: front
+    tier: frontend
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-
   type: LoadBalancer

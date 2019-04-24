@@ -1,27 +1,29 @@
-apiVersion: v1
+
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: crawler-depployment
+  name: crawler-deployment
   namespace: air-quality-tracker
-
+  labels:
+    app: crawler
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: crawler
       tier: backend
-  replicas: 1
   template:
     metadata:
       labels:
         app: crawler
         tier: backend
-      spec:
-        containers:
-          - name: crawler-container
-            image: k8s/crawler
-            env:
-              - name: MY_AWS_REGION
-                value: us-west-2
-              - name: MY_AWS_KINESIS_NAME
-                value: air-quality-stream
+    spec:
+      containers:
+        - name: crawler
+          image: 530820415924.dkr.ecr.us-west-2.amazonaws.com/crawler:latest
+          env:
+            - name: MY_AWS_REGION
+              value: us-west-2
+            - name: MY_AWS_KINESIS_NAME
+              value: air-quality-stream
 
