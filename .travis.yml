@@ -25,8 +25,8 @@ matrix:
         - export PATH=$PATH:$HOME/.local/bin # put aws in the path
         - $(aws --region $AWS_REGION ecr get-login --no-include-email) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
         - docker build -t crawler .
-        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
-        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_ID
+        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_ID
+        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_ID
 
     - language: go
       go:

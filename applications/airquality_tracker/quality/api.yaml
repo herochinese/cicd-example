@@ -1,0 +1,102 @@
+swagger: '2.0'
+info:
+  description: API definitions for Air Quality Tracker with Amazon API Gateway. This is a sample API that integrates via HTTP with our demo Air Quality Tracker endpoints
+  title: Air Quality Tracker
+  version: 1.0.0
+schemes:
+  - https
+paths:
+  /cities:
+    get:
+      tags:
+        - cities
+      description: The air quality of all cities.
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/AirQualities'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              description: URI that may access the resource
+            Content-Type:
+              type: string
+              description: Media type of request
+  '/cities/{city}':
+    get:
+      tags:
+        - city
+      summary: The air quality for a specific city
+      produces:
+        - application/json
+      parameters:
+        - name: city
+          in: path
+          description: The name of the city to retrieve
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/AirQuality'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              description: URI that may access the resource
+            Content-Type:
+              type: string
+              description: Media type of request
+definitions:
+  AirQualities:
+    type: array
+    items:
+      $ref: '#/definitions/AirQuality'
+  AirQuality:
+    type: object
+    properties:
+      index_city_v_hash:
+        type: string
+      index_city:
+        type: string
+      idx:
+        type: number
+      aqi:
+        type: number
+      city:
+        type: string
+      city_cn:
+        type: string
+      lat:
+        type: string
+      lng:
+        type: string
+      co:
+        type: string
+      h:
+        type: string
+      no2:
+        type: string
+      o3:
+        type: string
+      p:
+        type: string
+      pm10:
+        type: string
+      pm25:
+        type: string
+      so2:
+        type: string
+      t:
+        type: string
+      w:
+        type: string
+      s:
+        type: string
+      tz:
+        type: string
+      v:
+        type: number

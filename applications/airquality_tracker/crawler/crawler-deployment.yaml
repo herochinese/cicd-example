@@ -19,4 +19,9 @@ spec:
         containers:
           - name: crawler-container
             image: k8s/crawler
+            env:
+              - name: MY_AWS_REGION
+                value: us-west-2
+              - name: MY_AWS_KINESIS_NAME
+                value: air-quality-stream
 
