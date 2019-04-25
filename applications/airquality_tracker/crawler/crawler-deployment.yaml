@@ -27,5 +27,5 @@ spec:
             - name: MY_AWS_KINESIS_NAME
               value: air-quality-stream
 
-##
+
 ##
