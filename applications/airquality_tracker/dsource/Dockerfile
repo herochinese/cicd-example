@@ -27,3 +27,4 @@ FROM scratch
 COPY --from=builder /go/bin/dsource /go/bin/dsource
 #EXPOSE 8080
 CMD ["/go/bin/dsource"]
+
