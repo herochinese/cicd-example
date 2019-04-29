@@ -26,7 +26,7 @@ Install Halyard client ands Spinnaker on EKS cluster, as well as configure essen
 ## Configure Spinnaker
 Configure Spinnaker to be able to publicly accessible, and integrate with GitHub, Travis CI, ECR, Amazon EKS, etc.
 
-### Public access to Spinnaker
+### Spinnaker with public access
 ```
 kubectl edit svc spin-deck -n spinnaker
 #type: LoadBalancer
@@ -45,11 +45,12 @@ hal config security api edit \
     --override-base-url http://ac275d6cb68f811e9b39002fecc04dad-144154736.us-west-2.elb.amazonaws.com:8084
 
 #hal deploy apply
-#Add file - gate.yml at ~/.hal/default/service-settings/ if not working
-#overrideBaseUrl: http://ac275d6cb68f811e9b39002fecc04dad-144154736.us-west-2.elb.amazonaws.com:8084
 ```
+>Note:
 
-### GitHub
+Add a file - gate.yml at ~/.hal/default/service-settings/ with following content - "overrideBaseUrl: http://ac275d6cb68f811e9b39002fecc04dad-144154736.us-west-2.elb.amazonaws.com:8084" if not working (still access http://localhost:8084).
+
+### GitHub with access token
 ```
 TOKEN=?
 TOKEN_FILE=./git.token2
@@ -62,21 +63,48 @@ hal config artifact github account add $ARTIFACT_ACCOUNT_NAME \
     --token-file $TOKEN_FILE
 
 #hal deploy apply
+
 ```
+
+### Configure GitHub webhook for the repository
+In the repository of GitHub, navigate to Settings > Webhooks > Add Webhook.
+
+```
+Payload URL : $ENDPOINT(Gate of Spinnaker)/webhooks/git/github
+
+Content type : application/json
+
+Secret :
+```
+
+https://www.spinnaker.io/setup/triggers/github/
+
 
 ### Travis CI
 ```
 ```
+https://www.spinnaker.io/setup/ci/travis/
 
 ### Amazon ECR
 ```
 ```
+https://docs.armory.io/spinnaker-install-admin-guides/ecr-registry/
+https://docs.armory.io/admin-guides/configure_kubernetes/?gclid=CjwKCAjwwZrmBRA7EiwA4iMzBDvjRZaj5K0o6r0DjxqkNnpaBEyduTJyH_DsrPz_mFKy0vlUKcQR0hoCJdwQAvD_BwE
 
 
 # Scenarios
 
 ## Configure Application for Simple Deployment
-Setup a simple application with pipeline to experience Spinnaker.
+Setup a simple application with pipeline to experience Spinnaker. Here is screen shot of first example. Easy!!!
+![Here is first example](../docs/spinnaker-simple-example.png)
+
+High level process:
+- [ ] Create an application
+- [ ] Define the infrastructure the service will run on
+- [ ] Create a pipeline
+- [ ] Run your pipeline to deploy your service
+
+For practice, and to see some sample deployment scenarios, check out : https://www.spinnaker.io/guides/user/get-started/
 
 ## Configure Application for Blue/Green Deployment
 
