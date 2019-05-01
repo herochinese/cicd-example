@@ -42,9 +42,9 @@ matrix:
         - pip install --user awscli
         - export PATH=$PATH:$HOME/.local/bin # put aws in the path
         - $(aws --region $AWS_REGION ecr get-login --no-include-email) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
-        - docker build -t crawler .
-        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_NUMBER
-        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_NUMBER
+        - docker build -t quality .
+        - docker tag quality:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/quality:$TRAVIS_BUILD_NUMBER
+        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/quality:$TRAVIS_BUILD_NUMBER
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
       before_deploy:
