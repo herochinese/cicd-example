@@ -48,7 +48,6 @@ matrix:
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
       before_deploy:
-        # Set up git user name and tag this commit
         - git config --local user.name "chuancc"
         - git config --local user.email "chuancc@gmail.com"
         - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
@@ -60,8 +59,8 @@ matrix:
           - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
           - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
         skip_cleanup: true
-        on:
-          tags: true
+        # on:
+        #   tags: true
 
     - language: go
       go:
