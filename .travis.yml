@@ -59,8 +59,9 @@ matrix:
           - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
           - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
         skip_cleanup: true
-        # on:
-        #   tags: true
+        on:
+          all_branches: true
+          tags: true
 
     - language: go
       go:
