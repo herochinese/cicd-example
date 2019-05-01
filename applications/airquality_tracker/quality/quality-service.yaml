@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: quality-service
+  name: quality-service-{build_number}
   namespace: air-quality-tracker
   labels:
-    run: quality-service
+    run: quality-service-{build_number}
 spec:
   selector:
-    app: quality
+    app: quality-{build_number}
     tier: frontend
   ports:
     - protocol: TCP

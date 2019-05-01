@@ -3,25 +3,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quality-deployment
+  name: quality-deployment-{build_number}
   namespace: air-quality-tracker
   labels:
-    app: quality
+    app: quality-{build_number}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: quality
+      app: quality-{build_number}
       tier: frontend
   template:
     metadata:
       labels:
-        app: quality
+        app: quality-{build_number}
         tier: frontend
     spec:
       containers:
-        - name: crawler
-          image: 530820415924.dkr.ecr.us-west-2.amazonaws.com/quality:latest
+        - name: quality-{build_number}
+          image: 530820415924.dkr.ecr.us-west-2.amazonaws.com/quality:{build_number}
           ports:
             - name: http
               containerPort: 8080

@@ -25,8 +25,8 @@ matrix:
         - export PATH=$PATH:$HOME/.local/bin # put aws in the path
         - $(aws --region $AWS_REGION ecr get-login --no-include-email) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
         - docker build -t crawler .
-        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_ID
-        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_ID
+        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_NUMBER
+        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:latest #$TRAVIS_BUILD_NUMBER
 
     - language: go
       go:
@@ -37,6 +37,25 @@ matrix:
         - cd $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
         - go test -v ./...
         - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o quality
+      after_success:
+        - docker --version
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin # put aws in the path
+        - $(aws --region $AWS_REGION ecr get-login --no-include-email) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+        - docker build -t crawler .
+        - docker tag crawler:latest $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_NUMBER
+        - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/crawler:$TRAVIS_BUILD_NUMBER
+        - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
+        - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
+      deploy:
+        provider: releases
+        api_key: $GIT_API_KEY
+        file:
+          - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
+          - $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
+        skip_cleanup: true
+        on:
+          tags: true
 
     - language: go
       go:

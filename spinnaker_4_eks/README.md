@@ -51,7 +51,7 @@ hal config security api edit \
 Add a file - gate.yml at ~/.hal/default/service-settings/ with following content - "overrideBaseUrl: http://ac275d6cb68f811e9b39002fecc04dad-144154736.us-west-2.elb.amazonaws.com:8084" if not working (still access http://localhost:8084).
 
 
-### 
+###
 
 ### GitHub with access token
 ```
@@ -66,7 +66,6 @@ hal config artifact github account add $ARTIFACT_ACCOUNT_NAME \
     --token-file $TOKEN_FILE
 
 #hal deploy apply
-
 ```
 
 ### Configure GitHub webhook for the repository
@@ -85,6 +84,16 @@ https://www.spinnaker.io/setup/triggers/github/
 
 ### Travis CI
 ```
+hal config ci travis enable
+hal config features edit --travis true
+
+hal config ci travis master add my-travis-master \
+  --address https://api.travis-ci.org \
+  --base-url https://travis-ci.org \
+  --github-token \ # The GitHub token to authenticate to Travis
+  --number-of-repositories 4
+
+#hal deploy apply
 ```
 https://www.spinnaker.io/setup/ci/travis/
 

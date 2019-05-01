@@ -10,7 +10,7 @@ import (
 func main() {
 	//Recover data from DynamoDB if needs to
 	dyn.RecoverData()
-	
+
 	router := api.NewRouter()
 	bind := ":8080"
 	log.Printf("Quality Server is ready at [ %s ]\n", bind)
