@@ -50,6 +50,9 @@ hal config security api edit \
 
 Add a file - gate.yml at ~/.hal/default/service-settings/ with following content - "overrideBaseUrl: http://ac275d6cb68f811e9b39002fecc04dad-144154736.us-west-2.elb.amazonaws.com:8084" if not working (still access http://localhost:8084).
 
+
+### 
+
 ### GitHub with access token
 ```
 TOKEN=?
@@ -94,7 +97,7 @@ https://docs.armory.io/admin-guides/configure_kubernetes/?gclid=CjwKCAjwwZrmBRA7
 
 # Scenarios
 
-## Configure Application for Simple Deployment
+## Configure Applications for Simple Deployment
 Setup a simple application with pipeline to experience Spinnaker. Here is screen shot of first example. Easy!!!
 ![Here is first example](../docs/spinnaker-simple-example.png)
 
@@ -106,11 +109,11 @@ High level process:
 
 For practice, and to see some sample deployment scenarios, check out : https://www.spinnaker.io/guides/user/get-started/
 
-## Configure Application for Blue/Green Deployment
+## Configure Applications for Blue/Green Deployment
 
-## Configure Application for Canary Deployment
+## Configure Applications for Canary Deployment
 
-## Configure Application for Multiple Cloud
+## Configure Applications for Multiple Cloud
 
 Deploy application to multiple cloud providers, in this case we'll use AWS and GCP as our targets. It's an excellent solution for continuous deployment on hybrid cloud infrastructure.
 
