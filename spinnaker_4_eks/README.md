@@ -97,6 +97,11 @@ hal config ci travis master add my-travis-master \
 ```
 https://www.spinnaker.io/setup/ci/travis/
 
+### Configure the Script stage
+https://eksworkshop.com/jenkinsworld/jenkins/prereqs/
+https://www.spinnaker.io/guides/user/pipeline/expressions/
+https://www.spinnaker.io/setup/features/script-stage/
+
 ### Amazon ECR
 ```
 ```
