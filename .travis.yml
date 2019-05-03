@@ -63,7 +63,7 @@ matrix:
         bucket: spin-airqt-release
         local_dir: $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
         skip_cleanup: true
-        region: us-west-2
+        region: us-east-1
         on:
           all_branches: true
 
