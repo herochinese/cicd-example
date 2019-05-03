@@ -60,7 +60,7 @@ matrix:
         provider: s3
         access_key_id: $AWS_ACCESS_KEY_ID
         secret_access_key: $AWS_SECRET_ACCESS_KEY
-        bucket: spin-997a3cea-b904-4590-b10a-9890b931c597
+        bucket: spin-airqt-release
         local_dir: $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
         skip_cleanup: true
         region: us-west-2
