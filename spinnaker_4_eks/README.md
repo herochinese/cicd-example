@@ -102,8 +102,35 @@ https://eksworkshop.com/jenkinsworld/jenkins/prereqs/
 https://www.spinnaker.io/guides/user/pipeline/expressions/
 https://www.spinnaker.io/setup/features/script-stage/
 
+### Artifacts by S3
+```
+hal config features edit --artifacts true
+hal config artifact s3 enable
+
+AWS_DEFAULT_REGION=us-west-2
+AWS_ACCESS_KEY_ID=?
+
+hal config artifact s3 account add artifacts-s3-account \
+  --region $AWS_DEFAULT_REGION \
+  --aws-access-key-id $AWS_ACCESS_KEY_ID \
+  --aws-secret-access-key
+
+```
+
 ### Amazon ECR
 ```
+hal config provider docker-registry enable
+
+#The Spinnaker instance running the Clouddriver service will also need permissions to interact #with the ECR repository. Attach the AmazonEC2ContainerRegistryReadOnly
+#managed policy to the IAM role for your Spinnaker instance profile
+
+aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly --role-name <Spinnaker Instance Role>
+
+hal config provider docker-registry account add crawler \
+ --address $ADDRESS \
+ --username AWS \
+ --password-command "aws --region $REGION ecr get-authorization-token --output text --query 'authorizationData[].authorizationToken' | base64 -D | sed 's/^AWS://'"
+
 ```
 https://docs.armory.io/spinnaker-install-admin-guides/ecr-registry/
 https://docs.armory.io/admin-guides/configure_kubernetes/?gclid=CjwKCAjwwZrmBRA7EiwA4iMzBDvjRZaj5K0o6r0DjxqkNnpaBEyduTJyH_DsrPz_mFKy0vlUKcQR0hoCJdwQAvD_BwE
