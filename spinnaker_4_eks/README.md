@@ -126,6 +126,9 @@ hal config provider docker-registry enable
 
 aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly --role-name <Spinnaker Instance Role>
 
+#Repeat this command for multiple kubernetes environments
+
+
 hal config provider docker-registry account add crawler \
  --address $ADDRESS \
  --username AWS \
