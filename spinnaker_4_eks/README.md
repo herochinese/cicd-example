@@ -155,6 +155,8 @@ For practice, and to see some sample deployment scenarios, check out : https://w
 
 ## Configure Applications for Blue/Green Deployment
 
+> [Blue/Green Deployment ... ...](BlueGreen.md)
+
 ## Configure Applications for Canary Deployment
 
 ## Configure Applications for Multiple Cloud
