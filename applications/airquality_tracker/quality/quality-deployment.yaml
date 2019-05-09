@@ -7,6 +7,8 @@ metadata:
   namespace: air-quality-tracker
   labels:
     app: quality-{build_number}
+    cbr: can-be-removed
+    bn: {build_number}
 spec:
   replicas: 2
   selector:
