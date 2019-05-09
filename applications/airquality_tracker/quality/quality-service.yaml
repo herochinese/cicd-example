@@ -6,7 +6,7 @@ metadata:
   labels:
     run: quality-service-{build_number}
     cbr: can-be-removed
-    bn: {build_number}
+    bn: bn-{build_number}
 spec:
   selector:
     app: quality-{build_number}
