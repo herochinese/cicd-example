@@ -1,6 +1,8 @@
 
 > draft@
 
+# Why
+
 # Description
 
 Spinnaker is one of popular tooling for continuous deployment/delivery. The following experiment of CI/CD process will leverage the power of Spinnaker to address some key scenarios, mainly focus on containerize applications on Kubernetes.
