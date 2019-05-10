@@ -62,7 +62,7 @@ matrix:
         secret_access_key: $AWS_SECRET_ACCESS_KEY
         bucket: spin-airqt-release
         local_dir: $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
-        upload-dir: quality
+        upload-dir: $TRAVIS_BUILD_DIR/quality
         skip_cleanup: true
         region: us-east-1
         on:
