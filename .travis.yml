@@ -47,6 +47,8 @@ matrix:
         - docker push $AWS_ECR_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/quality:$TRAVIS_BUILD_NUMBER
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-deployment.yaml
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
+        - mkdir -p $TRAVIS_BUILD_DIR/$TRAVIS_BUILD_NUMBER/quality
+        - cp $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/*.yaml $TRAVIS_BUILD_DIR/$TRAVIS_BUILD_NUMBER/quality
         # - git config --local user.name "chuancc"
         # - git config --local user.email "chuancc@gmail.com"
         # - git tag $TRAVIS_BUILD_NUMBER
@@ -61,8 +63,7 @@ matrix:
         access_key_id: $AWS_ACCESS_KEY_ID
         secret_access_key: $AWS_SECRET_ACCESS_KEY
         bucket: spin-airqt-release
-        local_dir: $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality
-        upload-dir: $TRAVIS_BUILD_DIR/quality
+        local_dir: $TRAVIS_BUILD_DIR/$TRAVIS_BUILD_NUMBER
         skip_cleanup: true
         region: us-east-1
         on:
