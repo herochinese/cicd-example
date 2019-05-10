@@ -1,326 +1,291 @@
 {
-    "expectedArtifacts": [
-      {
-        "defaultArtifact": {
-          "id": "022dd1da-4d66-4e8a-a514-c264f8cd0faf",
-          "name": "applications/airquality_tracker/quality/quality-deployment.yaml",
-          "reference": "https://api.github.com/repos/cc4i/cicd-example/contents/applications/airquality_tracker/quality/quality-deployment.yaml",
-          "type": "github/file",
-          "version": "feature_air-quality-tracker"
-        },
-        "displayName": "quality-deployment.yaml",
-        "id": "e0516eef-f1c8-448e-a3e5-0f1168a70e25",
-        "matchArtifact": {
-          "id": "65455deb-4996-4816-a82a-8beb74811ae1",
-          "name": "applications/airquality_tracker/quality/quality-deployment.yaml",
-          "type": "github/file"
-        },
-        "useDefaultArtifact": true,
-        "usePriorArtifact": false
+  "expectedArtifacts": [
+    {
+      "defaultArtifact": {
+        "id": "93a660bf-72ee-4052-b2e2-4dad2ec3b7ab",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-deployment.yaml",
+        "reference": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-deployment.yaml",
+        "type": "s3/object"
       },
-      {
-        "defaultArtifact": {
-          "id": "405c14c7-a872-441d-bd0c-b184958f06e8",
-          "name": "applications/airquality_tracker/quality/quality-service.yaml",
-          "reference": "https://api.github.com/repos/cc4i/cicd-example/contents/applications/airquality_tracker/quality/quality-service.yaml",
-          "type": "github/file",
-          "version": "feature_air-quality-tracker"
-        },
-        "displayName": "quality-service.yaml",
-        "id": "605930cf-08c3-4b23-b79c-afd72ae40aee",
-        "matchArtifact": {
-          "id": "9e2f9e30-d2ab-433c-a779-5e71d0cff884",
-          "name": "applications/airquality_tracker/quality/quality-service.yaml",
-          "type": "github/file"
-        },
-        "useDefaultArtifact": true,
-        "usePriorArtifact": false
+      "displayName": "s3--quality-deployment.yaml",
+      "id": "431d6f14-1dc1-424e-9e63-742fbdd42207",
+      "matchArtifact": {
+        "id": "6ada984a-1aee-41d5-90a1-d5044ca66d37",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-deployment.yaml",
+        "type": "s3/object"
       },
-      {
-        "defaultArtifact": {
-          "id": "93a660bf-72ee-4052-b2e2-4dad2ec3b7ab",
-          "name": "s3://spin-airqt-release/quality/quality-deployment.yaml",
-          "reference": "s3://spin-airqt-release/quality/quality-deployment.yaml",
-          "type": "s3/object"
-        },
-        "displayName": "s3--quality-deployment.yaml",
-        "id": "431d6f14-1dc1-424e-9e63-742fbdd42207",
-        "matchArtifact": {
-          "id": "6ada984a-1aee-41d5-90a1-d5044ca66d37",
-          "name": "s3://spin-airqt-release/quality/quality-deployment.yaml",
-          "type": "s3/object"
-        },
-        "useDefaultArtifact": true,
-        "usePriorArtifact": false
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    },
+    {
+      "defaultArtifact": {
+        "id": "cb53e778-f717-4413-9fdb-4c4499c04a08",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service.yaml",
+        "reference": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service.yaml",
+        "type": "s3/object"
       },
-      {
-        "defaultArtifact": {
-          "id": "cb53e778-f717-4413-9fdb-4c4499c04a08",
-          "name": "s3://spin-airqt-release/quality/quality-service.yaml",
-          "reference": "s3://spin-airqt-release/quality/quality-service.yaml",
-          "type": "s3/object"
-        },
-        "displayName": "s3--quality-service.yaml",
-        "id": "11e124a1-a98c-4312-b737-ba1d93df7664",
-        "matchArtifact": {
-          "id": "6ef90be4-7950-447f-9845-0de831ddae8a",
-          "name": "s3://spin-airqt-release/quality/quality-service.yaml",
-          "type": "s3/object"
-        },
-        "useDefaultArtifact": true,
-        "usePriorArtifact": false
+      "displayName": "s3--quality-service.yaml",
+      "id": "11e124a1-a98c-4312-b737-ba1d93df7664",
+      "matchArtifact": {
+        "id": "6ef90be4-7950-447f-9845-0de831ddae8a",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service.yaml",
+        "type": "s3/object"
       },
-      {
-        "defaultArtifact": {
-          "id": "548d95a4-e262-4bf6-adbb-3bfdf4cde122",
-          "reference": "s3://spin-airqt-release/quality/quality-service-final.yaml",
-          "type": "s3/object"
-        },
-        "displayName": "s3--quality-service-final.yaml",
-        "id": "54c15519-c4a6-42d1-a17f-f63fb4356ced",
-        "matchArtifact": {
-          "id": "a966775a-30dd-44fd-a2b4-5284abb3a012",
-          "name": "s3://spin-airqt-release/quality/quality-service-final.yaml",
-          "type": "s3/object"
-        },
-        "useDefaultArtifact": true,
-        "usePriorArtifact": false
-      }
-    ],
-    "keepWaitingPipelines": false,
-    "lastModifiedBy": "anonymous",
-    "limitConcurrent": true,
-    "parameterConfig": [],
-    "stages": [
-      {
-        "account": "aqt-test-k8s-v2-account",
-        "cloudProvider": "kubernetes",
-        "expectedArtifacts": [],
-        "manifestArtifactAccount": "artifacts-s3-account",
-        "manifestArtifactId": "431d6f14-1dc1-424e-9e63-742fbdd42207",
-        "manifests": [
-          {
-            "apiVersion": "apps/v1",
-            "kind": "Deployment",
-            "metadata": {
-              "labels": {
-                "app": "quality-30"
-              },
-              "name": "quality-deployment-30",
-              "namespace": "air-quality-tracker"
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    },
+    {
+      "defaultArtifact": {
+        "id": "548d95a4-e262-4bf6-adbb-3bfdf4cde122",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service-final.yaml",
+        "reference": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service-final.yaml",
+        "type": "s3/object"
+      },
+      "displayName": "s3--quality-service-final.yaml",
+      "id": "54c15519-c4a6-42d1-a17f-f63fb4356ced",
+      "matchArtifact": {
+        "id": "a966775a-30dd-44fd-a2b4-5284abb3a012",
+        "name": "s3://spin-airqt-release/${trigger['buildNumber']}/quality/quality-service-final.yaml",
+        "type": "s3/object"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "anonymous",
+  "limitConcurrent": true,
+  "parameterConfig": [],
+  "stages": [
+    {
+      "account": "aqt-test-k8s-v2-account",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [],
+      "manifestArtifactAccount": "artifacts-s3-account",
+      "manifestArtifactId": "431d6f14-1dc1-424e-9e63-742fbdd42207",
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "labels": {
+              "app": "quality-30"
             },
-            "spec": {
-              "replicas": 2,
-              "selector": {
-                "matchLabels": {
+            "name": "quality-deployment-30",
+            "namespace": "air-quality-tracker"
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "quality-30",
+                "tier": "frontend"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
                   "app": "quality-30",
                   "tier": "frontend"
                 }
               },
-              "template": {
-                "metadata": {
-                  "labels": {
-                    "app": "quality-30",
-                    "tier": "frontend"
+              "spec": {
+                "containers": [
+                  {
+                    "env": [
+                      {
+                        "name": "MY_AWS_REGION",
+                        "value": "us-west-2"
+                      },
+                      {
+                        "name": "MY_AWS_KINESIS_NAME",
+                        "value": "air-quality-stream"
+                      }
+                    ],
+                    "image": "530820415924.dkr.ecr.us-west-2.amazonaws.com/quality:30",
+                    "name": "quality-30",
+                    "ports": [
+                      {
+                        "containerPort": 8080,
+                        "name": "http"
+                      }
+                    ]
                   }
-                },
-                "spec": {
-                  "containers": [
-                    {
-                      "env": [
-                        {
-                          "name": "MY_AWS_REGION",
-                          "value": "us-west-2"
-                        },
-                        {
-                          "name": "MY_AWS_KINESIS_NAME",
-                          "value": "air-quality-stream"
-                        }
-                      ],
-                      "image": "530820415924.dkr.ecr.us-west-2.amazonaws.com/quality:30",
-                      "name": "quality-30",
-                      "ports": [
-                        {
-                          "containerPort": 8080,
-                          "name": "http"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                ]
               }
             }
           }
-        ],
-        "moniker": {
-          "app": "airqt-ab"
-        },
-        "name": "Apply deployment",
-        "refId": "1",
-        "relationships": {
-          "loadBalancers": [],
-          "securityGroups": []
-        },
-        "requisiteStageRefIds": [],
-        "skipExpressionEvaluation": false,
-        "source": "artifact",
-        "type": "deployManifest"
+        }
+      ],
+      "moniker": {
+        "app": "airqt-ab"
       },
-      {
-        "failPipeline": true,
-        "judgmentInputs": [],
-        "name": "Wait approval to A/B",
-        "notifications": [],
-        "refId": "3",
-        "requisiteStageRefIds": [
-          "5"
-        ],
-        "type": "manualJudgment"
+      "name": "Apply deployment",
+      "refId": "1",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
       },
-      {
-        "account": "aqt-test-k8s-v2-account",
-        "cloudProvider": "kubernetes",
-        "manifestArtifactAccount": "artifacts-s3-account",
-        "manifestArtifactId": "11e124a1-a98c-4312-b737-ba1d93df7664",
-        "manifests": [
-          {
-            "apiVersion": "v1",
-            "kind": "Service",
-            "metadata": {
-              "labels": {
-                "run": "quality-service-30"
-              },
-              "name": "quality-service-30",
-              "namespace": "air-quality-tracker"
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "type": "deployManifest"
+    },
+    {
+      "failPipeline": true,
+      "judgmentInputs": [],
+      "name": "Wait approval to A/B",
+      "notifications": [],
+      "refId": "3",
+      "requisiteStageRefIds": [
+        "5"
+      ],
+      "type": "manualJudgment"
+    },
+    {
+      "account": "aqt-test-k8s-v2-account",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "artifacts-s3-account",
+      "manifestArtifactId": "11e124a1-a98c-4312-b737-ba1d93df7664",
+      "manifests": [
+        {
+          "apiVersion": "v1",
+          "kind": "Service",
+          "metadata": {
+            "labels": {
+              "run": "quality-service-30"
             },
-            "spec": {
-              "ports": [
-                {
-                  "port": 8080,
-                  "protocol": "TCP",
-                  "targetPort": 8080
-                }
-              ],
-              "selector": {
-                "app": "quality-30",
-                "tier": "frontend"
-              },
-              "type": "LoadBalancer"
-            }
-          }
-        ],
-        "moniker": {
-          "app": "airqt-ab"
-        },
-        "name": "Apply service",
-        "refId": "4",
-        "relationships": {
-          "loadBalancers": [],
-          "securityGroups": []
-        },
-        "requisiteStageRefIds": [
-          "1"
-        ],
-        "skipExpressionEvaluation": false,
-        "source": "artifact",
-        "type": "deployManifest"
-      },
-      {
-        "account": "aqt-test-k8s-v2-account",
-        "cloudProvider": "kubernetes",
-        "expectedArtifacts": [],
-        "manifestArtifactAccount": "artifacts-s3-account",
-        "manifestArtifactId": "54c15519-c4a6-42d1-a17f-f63fb4356ced",
-        "moniker": {
-          "app": "airqt-ab"
-        },
-        "name": "Apply final-service",
-        "refId": "5",
-        "relationships": {
-          "loadBalancers": [],
-          "securityGroups": []
-        },
-        "requisiteStageRefIds": [
-          "4"
-        ],
-        "skipExpressionEvaluation": false,
-        "source": "artifact",
-        "type": "deployManifest"
-      },
-      {
-        "account": "aqt-test-k8s-v2-account",
-        "app": "airqt-ab",
-        "cloudProvider": "kubernetes",
-        "kinds": [
-          "service",
-          "deployment"
-        ],
-        "labelSelectors": {
-          "selectors": [
-            {
-              "key": "cbr",
-              "kind": "EQUALS",
-              "values": [
-                "can-be-removed"
-              ]
-            },
-            {
-              "key": "bn",
-              "kind": "NOT_EQUALS",
-              "values": [
-                "bn-${trigger['buildNumber']}"
-              ]
-            }
-          ]
-        },
-        "location": "air-quality-tracker",
-        "mode": "label",
-        "name": "Destroy old service",
-        "options": {
-          "cascading": true
-        },
-        "refId": "7",
-        "requisiteStageRefIds": [
-          "8"
-        ],
-        "type": "deleteManifest"
-      },
-      {
-        "account": "aqt-test-k8s-v2-account",
-        "app": "airqt-ab",
-        "cloudProvider": "kubernetes",
-        "location": "air-quality-tracker",
-        "manifestArtifactAccount": "cc4i-github-artifact-account",
-        "manifestName": "service quality-service",
-        "mode": "static",
-        "name": "Patch  Service",
-        "options": {
-          "mergeStrategy": "strategic",
-          "record": true
-        },
-        "patchBody": {
+            "name": "quality-service-30",
+            "namespace": "air-quality-tracker"
+          },
           "spec": {
+            "ports": [
+              {
+                "port": 8080,
+                "protocol": "TCP",
+                "targetPort": 8080
+              }
+            ],
             "selector": {
-              "app": "quality-${trigger['buildNumber']}"
-            }
+              "app": "quality-30",
+              "tier": "frontend"
+            },
+            "type": "LoadBalancer"
           }
-        },
-        "refId": "8",
-        "requisiteStageRefIds": [
-          "3"
-        ],
-        "source": "text",
-        "type": "patchManifest"
-      }
-    ],
-    "triggers": [
-      {
-        "enabled": false,
-        "job": "cc4i/cicd-example",
-        "master": "travis-my-travis-master",
-        "propertyFile": "",
-        "type": "travis"
-      }
-    ],
-    "updateTs": "1557411993000"
-  }
+        }
+      ],
+      "moniker": {
+        "app": "airqt-ab"
+      },
+      "name": "Apply service",
+      "refId": "4",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "type": "deployManifest"
+    },
+    {
+      "account": "aqt-test-k8s-v2-account",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [],
+      "manifestArtifactAccount": "artifacts-s3-account",
+      "manifestArtifactId": "54c15519-c4a6-42d1-a17f-f63fb4356ced",
+      "moniker": {
+        "app": "airqt-ab"
+      },
+      "name": "Apply final-service",
+      "refId": "5",
+      "relationships": {
+        "loadBalancers": [],
+        "securityGroups": []
+      },
+      "requisiteStageRefIds": [
+        "4"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "type": "deployManifest"
+    },
+    {
+      "account": "aqt-test-k8s-v2-account",
+      "app": "airqt-ab",
+      "cloudProvider": "kubernetes",
+      "kinds": [
+        "service",
+        "deployment"
+      ],
+      "labelSelectors": {
+        "selectors": [
+          {
+            "key": "cbr",
+            "kind": "EQUALS",
+            "values": [
+              "can-be-removed"
+            ]
+          },
+          {
+            "key": "bn",
+            "kind": "NOT_EQUALS",
+            "values": [
+              "bn-${trigger['buildNumber']}"
+            ]
+          }
+        ]
+      },
+      "location": "air-quality-tracker",
+      "mode": "label",
+      "name": "Destroy old service",
+      "options": {
+        "cascading": true
+      },
+      "refId": "7",
+      "requisiteStageRefIds": [
+        "8"
+      ],
+      "type": "deleteManifest"
+    },
+    {
+      "account": "aqt-test-k8s-v2-account",
+      "app": "airqt-ab",
+      "cloudProvider": "kubernetes",
+      "location": "air-quality-tracker",
+      "manifestArtifactAccount": "cc4i-github-artifact-account",
+      "manifestName": "service quality-service",
+      "mode": "static",
+      "name": "Patch  Service",
+      "options": {
+        "mergeStrategy": "strategic",
+        "record": true
+      },
+      "patchBody": {
+        "spec": {
+          "selector": {
+            "app": "quality-${trigger['buildNumber']}"
+          }
+        }
+      },
+      "refId": "8",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "source": "text",
+      "type": "patchManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "enabled": true,
+      "job": "cc4i/cicd-example",
+      "master": "travis-my-travis-master",
+      "propertyFile": "",
+      "type": "travis"
+    }
+  ],
+  "updateTs": "1557503134000"
+}
