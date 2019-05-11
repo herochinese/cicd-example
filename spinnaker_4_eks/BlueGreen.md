@@ -6,15 +6,24 @@ With Spinnaker we can easily implement blue/green deployment. I'll walk you thro
 
 If want to know more about other strategies of deployments, please stay in the tune.
 
-# Basic flow
+## Basic flow
 
 GitHub -> Tavis CI (Release on S3) ->  Spinnaker
 > Apply Deployment to TEST -> Apply Service to TEST -> Validating -> Patch Service -> Destroy OLD Service
 
 
-# How to configure
+## How to configure
 
 1. Add GitHub webhook to Spinnaker.
 2. Add GitHub webhook to Tavis CI. 
 3. Add Tavis CI webhook to Spinnaker. 
 4. Configure pipeline as per above flow.
+
+
+## Example screen shots
+
+![Triggered by Travis](../docs/ab-travis-trigger.png)
+
+![Deploy pods](../docs/ab-deployment-pods.png)
+
+![Deploy services](../docs/ab-deployment-svc.png)

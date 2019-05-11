@@ -1,16 +1,18 @@
-# Description
+# Install Spinnaker & innitial configuration 
+
+## Description
 
 Deploy Spinnaker on EKS and configure the Spinnaker, such as GitHub, Travis CI, ECR, etc., so CI/CD demo could work smoothly.
 
-# Prerequisites
+## Prerequisites
 
-# Processes
+## Processes
 
 **#1** - Install Halyard on MacOS (or check it here for other operation system. https://www.spinnaker.io/setup/install/halyard/).
 
 > Halyard is a command-line administration tool that manages the lifecycle of your Spinnaker deployment, including writing & validating your deployment’s configuration, deploying each of Spinnaker’s microservices, and updating the deployment.
 
-```
+```bash
 curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/macos/InstallHalyard.sh
 sudo bash InstallHalyard.sh
 
@@ -20,10 +22,10 @@ hal -v
 
 ```
 
-
 **#2** - Choose cloud provider, obviously it's EKS. In this case, we're gonna use Kubernetes Provider V2 (Manifest Based)
 
-```
+```bash
+
 # Create a kubernetes service account
 CONTEXT=$(kubectl config current-context)
 
@@ -39,9 +41,7 @@ TOKEN=$(kubectl get secret --context $CONTEXT \
    -o jsonpath='{.data.token}' | base64 --decode)
 
 kubectl config set-credentials ${CONTEXT}-token-user --token $TOKEN
-
 kubectl config set-context $CONTEXT --user ${CONTEXT}-token-user
-
 
 # Adding an account
 hal config provider kubernetes enable
@@ -52,8 +52,10 @@ hal config provider kubernetes account add $ACCOUNT \
     --provider-version v2 \
     --context $CONTEXT
 
-hal config features edit --artifacts true    
+hal config features edit --artifacts true
+
 ```
+
 >**Need to repeat above processes on different EKS cluster.**
 >
 > test, staging, production environments
@@ -62,16 +64,22 @@ hal config features edit --artifacts true
 
 >**Deploy Spinnaker inside the EKS cluster, which related to $ACCOUNT**
 
-```
+```bash
+
 hal config deploy edit --type distributed --account-name $ACCOUNT
 
 ```
+
+>**Need to repeat above processes on different EKS cluster.**
+>
+> test, staging, production environments
 
 
 
 **#4** - Choose S3 a storage source means that Spinnaker will store all of its persistent data in a Bucket.
 
-```
+```bash
+
 AWS_DEFAULT_REGION=us-west-2
 AWS_ACCESS_KEY_ID=?
 
@@ -86,7 +94,8 @@ hal config storage edit --type s3
 
 **#5** - Pick up a version to deploy Spinnaker and connect the UI.
 
-```
+```bash
+
 hal version list
 
 #Choose a version
