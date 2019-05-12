@@ -1,0 +1,73 @@
+{
+    "appConfig": {},
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "anonymous",
+    "limitConcurrent": true,
+    "parameterConfig": [],
+    "stages": [
+      {
+        "application": "airqt-ab",
+        "failPipeline": true,
+        "name": "Call TEST Pipeline",
+        "pipeline": "9b5d7aa8-793e-423d-8f0c-43c66e633e25",
+        "pipelineParameters": {
+          "bno": "${trigger['buildNumber']}"
+        },
+        "refId": "1",
+        "requisiteStageRefIds": [],
+        "type": "pipeline",
+        "waitForCompletion": true
+      },
+      {
+        "application": "airqt-ab",
+        "failPipeline": true,
+        "name": "Call Staging Pipeline",
+        "pipeline": "d10124d5-fe10-4270-9657-244053eeaeab",
+        "pipelineParameters": {
+          "bno": "${trigger['buildNumber']}"
+        },
+        "refId": "2",
+        "requisiteStageRefIds": [
+          "1"
+        ],
+        "type": "pipeline",
+        "waitForCompletion": true
+      },
+      {
+        "application": "airqt-ab",
+        "failPipeline": true,
+        "name": "Call Production Pipline",
+        "pipeline": "e36874e3-6204-4a75-b9c9-8bafcfbd1616",
+        "pipelineParameters": {
+          "bno": "${trigger['buildNumber']}"
+        },
+        "refId": "3",
+        "requisiteStageRefIds": [
+          "4"
+        ],
+        "type": "pipeline",
+        "waitForCompletion": true
+      },
+      {
+        "failPipeline": true,
+        "instructions": "It's  going to deploy to PRODUCTION. Are you sure???",
+        "judgmentInputs": [],
+        "name": "Push to Production???",
+        "notifications": [],
+        "refId": "4",
+        "requisiteStageRefIds": [
+          "2"
+        ],
+        "type": "manualJudgment"
+      }
+    ],
+    "triggers": [
+      {
+        "enabled": true,
+        "job": "cc4i/cicd-example",
+        "master": "travis-my-travis-master",
+        "type": "travis"
+      }
+    ],
+    "updateTs": "1557593022000"
+  }

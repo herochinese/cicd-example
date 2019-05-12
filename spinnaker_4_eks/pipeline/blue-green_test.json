@@ -62,6 +62,12 @@
       "label": "build number",
       "name": "bno",
       "required": true
+    },
+    {
+      "default": "true",
+      "description": "Automating the whole pipeline without judgement if it's true.",
+      "label": "auto",
+      "name": "auto"
     }
   ],
   "stages": [
@@ -94,6 +100,10 @@
       "requisiteStageRefIds": [
         "5"
       ],
+      "stageEnabled": {
+        "expression": "${#toBoolean(parameters['auto']) == true}",
+        "type": "expression"
+      },
       "type": "manualJudgment"
     },
     {
@@ -206,5 +216,5 @@
     }
   ],
   "triggers": [],
-  "updateTs": "1557591247000"
+  "updateTs": "1557594963000"
 }

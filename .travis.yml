@@ -31,6 +31,16 @@ matrix:
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/crawler/crawler-service.yaml
         - mkdir -p $TRAVIS_BUILD_DIR/release/$TRAVIS_BUILD_NUMBER/crawler
         - cp $TRAVIS_BUILD_DIR/applications/airquality_tracker/crawler/*.yaml $TRAVIS_BUILD_DIR/release/$TRAVIS_BUILD_NUMBER/crawler
+      deploy:
+        provider: s3
+        access_key_id: $AWS_ACCESS_KEY_ID
+        secret_access_key: $AWS_SECRET_ACCESS_KEY
+        bucket: spin-airqt-release
+        local_dir: $TRAVIS_BUILD_DIR/release
+        skip_cleanup: true
+        region: us-east-1
+        on:
+          all_branches: true
 
     - language: go
       go:
@@ -53,15 +63,6 @@ matrix:
         - sed -i -e "s/{build_number}/$TRAVIS_BUILD_NUMBER/g" $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/quality-service.yaml
         - mkdir -p $TRAVIS_BUILD_DIR/release/$TRAVIS_BUILD_NUMBER/quality
         - cp $TRAVIS_BUILD_DIR/applications/airquality_tracker/quality/*.yaml $TRAVIS_BUILD_DIR/release/$TRAVIS_BUILD_NUMBER/quality
-        # - git config --local user.name "chuancc"
-        # - git config --local user.email "chuancc@gmail.com"
-        # - git tag $TRAVIS_BUILD_NUMBER
-
-      # before_deploy:
-      #   - git config --local user.name "chuancc"
-      #   - git config --local user.email "chuancc@gmail.com"
-      #   - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-      #   - git tag $TRAVIS_TAG
       deploy:
         provider: s3
         access_key_id: $AWS_ACCESS_KEY_ID

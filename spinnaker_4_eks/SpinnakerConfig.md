@@ -133,3 +133,41 @@ Be careful to configure authorization token, which could cause error in Clouddri
 
 https://docs.armory.io/spinnaker-install-admin-guides/ecr-registry/
 https://docs.armory.io/admin-guides/configure_kubernetes/?gclid=CjwKCAjwwZrmBRA7EiwA4iMzBDvjRZaj5K0o6r0DjxqkNnpaBEyduTJyH_DsrPz_mFKy0vlUKcQR0hoCJdwQAvD_BwE
+
+## Prometheus & Grafana
+
+```bash
+
+kubectl create namespace prometheus
+helm install stable/prometheus \
+    --name prometheus \
+    --namespace prometheus \
+    --set alertmanager.persistentVolume.storageClass="gp2" \
+    --set server.persistentVolume.storageClass="gp2"
+
+
+kubectl create namespace grafana
+helm install stable/grafana \
+    --name grafana \
+    --namespace grafana \
+    --set persistence.storageClassName="gp2" \
+    --set adminPassword="EKS!sAWSome" \
+    --set datasources."datasources\.yaml".apiVersion=1 \
+    --set datasources."datasources\.yaml".datasources[0].name=Prometheus \
+    --set datasources."datasources\.yaml".datasources[0].type=prometheus \
+    --set datasources."datasources\.yaml".datasources[0].url=http://prometheus-server.prometheus.svc.cluster.local \
+    --set datasources."datasources\.yaml".datasources[0].access=proxy \
+    --set datasources."datasources\.yaml".datasources[0].isDefault=true \
+    --set service.type=LoadBalancer
+
+# k --context arn:aws:eks:us-west-2:530820415924:cluster/aqt-staging apply -f rbac-tiller.yaml
+# helm init --service-account tiller --kube-context arn:aws:eks:us-west-2:530820415924:cluster/aqt-staging
+# helm install stable/prometheus \
+#     --name prometheus \
+#     --namespace prometheus \
+#     --set alertmanager.persistentVolume.storageClass="gp2" \
+#     --set server.persistentVolume.storageClass="gp2" \
+#     --kube-context arn:aws:eks:us-west-2:530820415924:cluster/aqt-staging
+
+```
+

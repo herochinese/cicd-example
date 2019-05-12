@@ -4,7 +4,14 @@
 
 Deploy Spinnaker on EKS and configure the Spinnaker, such as GitHub, Travis CI, ECR, etc., so CI/CD demo could work smoothly.
 
+Furhter detail of Spinnaker architecture: https://www.spinnaker.io/reference/architecture/
+
 ## Prerequisites
+
+- Python/2.7.15+
+- aws-cli/1.16.130+
+- kubectl/v1.12.7+
+- aws-iam-authenticator
 
 ## Processes
 
@@ -56,25 +63,19 @@ hal config features edit --artifacts true
 
 ```
 
->**Need to repeat above processes on different EKS cluster.**
+>**Need to repeat above processes(2) on different EKS cluster.**
 >
 > test, staging, production environments
 
-**#3** - Distributed installation on Kubernetes. Distributed installations are for development orgs with large resource footprints, and for those who can’t afford downtime during Spinnaker updates. Spinnaker is deployed to a remote cloud, with each microservice deployed independently. Halyard creates a smaller, headless Spinnaker to update your Spinnaker and its microservices, ensuring zero-downtime updates.
+**#3** - Choose environment: Distributed installation on Kubernetes. Distributed installations are for development orgs with large resource footprints, and for those who can’t afford downtime during Spinnaker updates. This is highly recommended for use in production. Spinnaker is deployed to a remote cloud, with each microservice deployed independently. Halyard creates a smaller, headless Spinnaker to update your Spinnaker and its microservices, ensuring zero-downtime updates.
 
->**Deploy Spinnaker inside the EKS cluster, which related to $ACCOUNT**
+>**Deploy Spinnaker into the EKS cluster, where $ACCOUNT was created and main console would be running on.**
 
 ```bash
 
 hal config deploy edit --type distributed --account-name $ACCOUNT
 
 ```
-
->**Need to repeat above processes on different EKS cluster.**
->
-> test, staging, production environments
-
-
 
 **#4** - Choose S3 a storage source means that Spinnaker will store all of its persistent data in a Bucket.
 
